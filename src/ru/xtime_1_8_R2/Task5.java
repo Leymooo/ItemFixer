@@ -1,7 +1,3 @@
-// 
-// Decompiled by Procyon v0.5.30
-// 
-
 package ru.xtime_1_8_R2;
 
 import org.bukkit.Bukkit;

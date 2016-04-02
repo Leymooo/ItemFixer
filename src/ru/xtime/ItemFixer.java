@@ -1,7 +1,3 @@
-// 
-// Decompiled by Procyon v0.5.30
-// 
-
 package ru.xtime;
 
 import org.bukkit.Bukkit;
@@ -17,13 +13,11 @@ public class ItemFixer extends JavaPlugin {
 	        if (setupItemFixer()) {
 
 
-	            getLogger().info("ItemFixer setup was successful!// Плагин запущен");
-	            getLogger().info("The plugin setup process is complete! // Плагин запущен");
+	            getLogger().info("РџР»Р°РіРёРЅ РІРєР»СЋС‡РµРЅ!");
 
 	        } else {
 
-	            getLogger().severe("Failed to start plugin//Ошибка при включении плагина!");
-	            getLogger().severe("Your server version is not compatible with this plugin//Ваша версия сервера не поддерживается!");
+	            getLogger().severe("Р’РµСЂСЃРёСЏ РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ.");
 
 	            Bukkit.getPluginManager().disablePlugin(this);
 	        }
