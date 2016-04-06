@@ -8,8 +8,10 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -20,7 +22,10 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 
 public class XListener implements Listener{  
-    
+    boolean b;
+    public XListener() {
+        this.b = false;
+    }   
 	@EventHandler
 	public void onPickupItem(final PlayerPickupItemEvent e) {
 		if (e.isCancelled()) {
@@ -136,5 +141,30 @@ public class XListener implements Listener{
 			}
 		}       
 	}
-}	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void lol(final PlayerInteractEvent e) {
+		final ItemStack its = e.getItem();
+		if(e.getPlayer().hasPermission("itemfixer.bypass")) {
+			this.b = false;
+		} else {
+			if (its != null && its.getType() == Material.MONSTER_EGG) {
+				final boolean a = ru.xtime_1_9R1.Checks.checkAttributes(its);
+				if (a) {
+					this.b = true;
+				}else {
+					this.b = false;
+				}
+			}
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    public void onSpawn(final CreatureSpawnEvent e) {
+    	if (!(e.getEntity() instanceof ArmorStand)) {
+    		if (e.getSpawnReason() == SpawnReason.SPAWNER_EGG) {
+    		e.setCancelled(this.b);
+    		}
+    	}
+    }
+}
 

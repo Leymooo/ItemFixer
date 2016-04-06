@@ -12,6 +12,8 @@ import org.bukkit.entity.TippedArrow;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -26,25 +28,28 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 
 public class XListener implements Listener{  
+    boolean b;
 	@EventHandler
 	public void onDamage(EntityDamageByEntityEvent event){
 		if (event.isCancelled()) {
 			return;
 		}
-		Player player = (Player) event.getEntity();
-		if (!player.hasPermission("itemfixer.bypass")) {
-			if(event.getEntity() instanceof Player && event.getDamager() instanceof TippedArrow){
-				TippedArrow arrow = (TippedArrow) event.getDamager();
-				if (arrow.hasCustomEffects()) {
-					event.setCancelled(true);
-					return;
+		if(event.getEntity() instanceof Player) {
+			Player player = (Player) event.getEntity();
+			if (!player.hasPermission("itemfixer.bypass")) {
+				if(event.getDamager() instanceof TippedArrow){
+					TippedArrow arrow = (TippedArrow) event.getDamager();
+					if (arrow.hasCustomEffects()) {
+						event.setCancelled(true);
+						return;
+					}
 				}
-			}
-			if (event.getDamager() instanceof AreaEffectCloud) {
-				AreaEffectCloud arc = (AreaEffectCloud) event.getDamager();
-				if (arc.hasCustomEffects()) {
-					event.setCancelled(true);
-					arc.remove();
+				if (event.getDamager() instanceof AreaEffectCloud) {
+					AreaEffectCloud arc = (AreaEffectCloud) event.getDamager();
+					if (arc.hasCustomEffects()) {
+						event.setCancelled(true);
+						arc.remove();
+					}
 				}
 			}
 		}
@@ -95,10 +100,10 @@ public class XListener implements Listener{
 			Player player = e.getPlayer();
 			if (!player.hasPermission("itemfixer.bypass")) {
 				final ItemStack item = e.getItem();
-				final boolean a = ru.xtime_1_9R1.Checks.checkAttributes(item);
-				if (a) {
-					e.getPlayer().getInventory().remove(item);
-				}
+				//final boolean a = ru.xtime_1_9R1.Checks.checkAttributes(item);
+				//if (a) {
+				//	e.getPlayer().getInventory().remove(item);
+				//}
 				final boolean b = ru.xtime_1_9R1.Checks.removeEnt(item);
 				e.setCancelled(b);
 			}
@@ -168,7 +173,7 @@ public class XListener implements Listener{
 	}
        
 	@EventHandler(priority = EventPriority.HIGHEST)
-	public void OnSpawn2 (ProjectileLaunchEvent e){
+	public void OnLaunch (ProjectileLaunchEvent e){
 		if (e.isCancelled()) {
 			return;
 		}
@@ -179,7 +184,38 @@ public class XListener implements Listener{
 					e.setCancelled(true);
 				}
 			}
-		}       
+		}
+		if (e.getEntity() instanceof TippedArrow){
+			TippedArrow arrow = (TippedArrow) e.getEntity();
+			if (arrow.hasCustomEffects()) {
+				e.setCancelled(true);
+			}
+		}
 	}
-}	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void lol(final PlayerInteractEvent e) {
+		final ItemStack its = e.getItem();
+		if(e.getPlayer().hasPermission("itemfixer.bypass")) {
+			this.b = false;
+		} else {
+			if (its != null && its.getType() == Material.MONSTER_EGG) {
+				final boolean a = ru.xtime_1_9R1.Checks.checkAttributes(its);
+				if (a) {
+					this.b = true;
+				}else {
+					this.b = false;
+				}
+			}
+        }
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    public void onSpawn(final CreatureSpawnEvent e) {
+    	if (!(e.getEntity() instanceof ArmorStand)) {
+    		if (e.getSpawnReason() == SpawnReason.SPAWNER_EGG) {
+    		e.setCancelled(this.b);
+    		}
+    	}
+    }
+}
 
