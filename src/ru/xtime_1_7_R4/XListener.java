@@ -80,6 +80,7 @@ public class XListener implements Listener{
 				final boolean a = ru.xtime_1_7_R4.Checks.checkAttributes(item);
 				if (a) {
 					e.getPlayer().getInventory().remove(item);
+					e.setCancelled(true);
 				}
 				final boolean b = ru.xtime_1_7_R4.Checks.removeEnt(item);
 				e.setCancelled(b);
