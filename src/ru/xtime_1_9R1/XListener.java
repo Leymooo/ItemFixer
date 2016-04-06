@@ -12,6 +12,7 @@ import org.bukkit.entity.TippedArrow;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -100,10 +101,11 @@ public class XListener implements Listener{
 			Player player = e.getPlayer();
 			if (!player.hasPermission("itemfixer.bypass")) {
 				final ItemStack item = e.getItem();
-				//final boolean a = ru.xtime_1_9R1.Checks.checkAttributes(item);
-				//if (a) {
-				//	e.getPlayer().getInventory().remove(item);
-				//}
+				final boolean a = ru.xtime_1_9R1.Checks.checkAttributes(item);
+				if (a) {
+					e.getPlayer().getInventory().remove(item);
+					e.setCancelled(true);
+				}
 				final boolean b = ru.xtime_1_9R1.Checks.removeEnt(item);
 				e.setCancelled(b);
 			}
@@ -192,6 +194,20 @@ public class XListener implements Listener{
 			}
 		}
 	}
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void OnLaunch2 (BlockDispenseEvent e){
+		if (e.isCancelled()) {
+			return;
+		}
+		final ItemStack item = e.getItem();
+		final boolean a = ru.xtime_1_9R1.Checks.checkAttributes(item);
+		if (a) {
+			e.setCancelled(true);
+		}
+		final boolean b = ru.xtime_1_9R1.Checks.removeEnt(item);
+		e.setCancelled(b);
+	}
+	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void lol(final PlayerInteractEvent e) {
 		final ItemStack its = e.getItem();

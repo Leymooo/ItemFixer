@@ -8,6 +8,7 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -42,7 +43,19 @@ public class XListener implements Listener{
 			ru.xtime_1_8_R3.Checks.removeEnt(item.getItemStack());
 		}
 	}
-    
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void OnLaunch2 (BlockDispenseEvent e){
+		if (e.isCancelled()) {
+			return;
+		}
+		final ItemStack item = e.getItem();
+		final boolean a = ru.xtime_1_8_R3.Checks.checkAttributes(item);
+		if (a) {
+			e.setCancelled(true);
+		}
+		final boolean b = ru.xtime_1_8_R3.Checks.removeEnt(item);
+		e.setCancelled(b);
+	}
 	@EventHandler
 	public void InventoryClick(final InventoryClickEvent e) {
 		if (e.isCancelled()) {
@@ -148,7 +161,7 @@ public class XListener implements Listener{
 			this.b = false;
 		} else {
 			if (its != null && its.getType() == Material.MONSTER_EGG) {
-				final boolean a = ru.xtime_1_9R1.Checks.checkAttributes(its);
+				final boolean a = ru.xtime_1_8_R3.Checks.checkAttributes(its);
 				if (a) {
 					this.b = true;
 				}else {

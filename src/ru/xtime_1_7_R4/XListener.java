@@ -7,6 +7,7 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -35,7 +36,19 @@ public class XListener implements Listener{
 			ru.xtime_1_7_R4.Checks.removeEnt(item.getItemStack());
 		}
 	}
-    
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void OnLaunch2 (BlockDispenseEvent e){
+		if (e.isCancelled()) {
+			return;
+		}
+		final ItemStack item = e.getItem();
+		final boolean a = ru.xtime_1_7_R4.Checks.checkAttributes(item);
+		if (a) {
+			e.setCancelled(true);
+		}
+		final boolean b = ru.xtime_1_7_R4.Checks.removeEnt(item);
+		e.setCancelled(b);
+	}
 	@EventHandler
 	public void InventoryClick(final InventoryClickEvent e) {
 		if (e.isCancelled()) {
