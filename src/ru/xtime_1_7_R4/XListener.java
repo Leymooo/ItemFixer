@@ -46,8 +46,6 @@ public class XListener implements Listener{
 		if (a) {
 			e.setCancelled(true);
 		}
-		final boolean b = ru.xtime_1_7_R4.Checks.removeEnt(item);
-		e.setCancelled(b);
 	}
 	@EventHandler
 	public void InventoryClick(final InventoryClickEvent e) {
