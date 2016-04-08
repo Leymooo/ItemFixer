@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 
 public class Task6 implements Runnable {
 	public void run() {
+	    String message = ChatColor.translateAlternateColorCodes('&', "&6[ItemFixer] &cНайдено новое обновление! &7// &cNew update found");
 	    String message2 = ChatColor.translateAlternateColorCodes('&', "&6[ItemFixer] &chttp://rubukkit.org/threads/119485/");
 	    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 	    console.sendMessage(message);
