@@ -8,6 +8,7 @@ import java.net.URL;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,16 +18,24 @@ public class ItemFixer extends JavaPlugin {
 	
 	public void onEnable() {
 		if (setupItemFixer()) {
-			getLogger().info("Плагин включен!");
+		    String message = ChatColor.translateAlternateColorCodes('&', "&aПлагин включен! &7// &aPlugin enabled");
+		    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+		    console.sendMessage(message);
 		} else {
-			getLogger().severe("Версия не поддерживается.");
+		    String message = ChatColor.translateAlternateColorCodes('&', "&aВерсия не поддерживается. &7// &aServer version is not supported");
+		    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+		    console.sendMessage(message);
 			Bukkit.getPluginManager().disablePlugin(this);
 		}
 		if (isUpdate()) {
 			Bukkit.getScheduler().runTaskTimerAsynchronously((Plugin)this, (Runnable)new ru.xtime.Task6(), 36000L, 36000L);
-			getLogger().severe(ChatColor.RED + "Есть обновление." + ChatColor.GOLD + " http://rubukkit.org/threads/119485/");
+		    String message = ChatColor.translateAlternateColorCodes('&', "&aЕсть обновление. &chttp://rubukkit.org/threads/119485/ &7// &aNew update found");
+		    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+		    console.sendMessage(message);
 		} else {
-			getLogger().severe(ChatColor.RED + "Обновление не найдено!");
+		    String message = ChatColor.translateAlternateColorCodes('&', "&aОбновление не найдено! &7// &aUpdate not found");
+		    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+		    console.sendMessage(message);
 		}
 	}	
 	public boolean isUpdate() {
@@ -38,26 +47,33 @@ public class ItemFixer extends JavaPlugin {
 
 				InputStreamReader pageInput;
 			try {
-				pageInput = new InputStreamReader(address.openStream());
+			pageInput = new InputStreamReader(address.openStream());
 			} catch (IOException e1) {
-				System.out.print("Не удалось установить соединение с сервером проверки версии :(");
+			    String message = ChatColor.translateAlternateColorCodes('&', "&4Не удалось установить соединение с сервером проверки версии &e:( &7// &4Can't connect to server");
+			    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+			    console.sendMessage(message);
 	        	return false;
 			}
 	        BufferedReader source = new BufferedReader(pageInput);
 	        sourceLine = source.readLine();
-	        String version = Bukkit.getPluginManager().getPlugin("ItemFixer").getDescription().toString();
-	        if(sourceLine != version){
+	        Integer int1 = Integer.valueOf(sourceLine);
+	        Integer version = Integer.valueOf(Bukkit.getPluginManager().getPlugin("ItemFixer").getDescription().getDescription().toString());
+	        if(int1 > version){
 	            return true;
 	        } else {
 	        	return false;
 
 	    }
 		} catch (MalformedURLException e2) {
-			System.out.print("Не удалось установить соединение с сервером проверки версии :(");
-        	return false;
+		    String message = ChatColor.translateAlternateColorCodes('&', "&4Не удалось установить соединение с сервером проверки версии &e:( &7// &4Can't connect to server");
+		    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+		    console.sendMessage(message);
+		    return false;
 		} catch (IOException e) {
-			System.out.print("Не удалось установить соединение с сервером проверки версии :(");
-        	return false;
+		    String message = ChatColor.translateAlternateColorCodes('&', "&4Не удалось установить соединение с сервером проверки версии &e:( &7// &4Can't connect to server");
+		    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+		    console.sendMessage(message);
+		    return false;
         }
 		
 	}
@@ -68,7 +84,9 @@ public class ItemFixer extends JavaPlugin {
 		} catch (ArrayIndexOutOfBoundsException whatVersionAreYouUsingException) {
 			return false;
 		}
-		getLogger().info("Server version " + version);
+	    String message = ChatColor.translateAlternateColorCodes('&', "&aServer version &c" + version);
+	    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+	    console.sendMessage(message);
 		if (version.equals("v1_9_R1")) {
 			ItemFixer = "Support";
 			this.getServer().getPluginManager().registerEvents((Listener)new ru.xtime_1_9R1.XListener(), (Plugin)this);
