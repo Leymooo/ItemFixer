@@ -9,7 +9,6 @@ import java.net.URL;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.plugin.Plugin;
 
 public class UpdateChecker implements Runnable {
 	Boolean b;
@@ -21,8 +20,15 @@ public class UpdateChecker implements Runnable {
 	public void run() {
 		if (!b){
 			if (isUpdate()) {
-				Bukkit.getScheduler().runTaskTimerAsynchronously((Plugin)this.plugin, (Runnable)new UpdNotification(), 24000L, 24000L);
 				b = true;
+			    String message = ChatColor.translateAlternateColorCodes('&', "&b[ItemFixer] &cНайдено новое обновление! &7// &cNew update found");
+			    String message2 = ChatColor.translateAlternateColorCodes('&', "&b[ItemFixer] &chttp://rubukkit.org/threads/119485/");
+			    String message3 = ChatColor.translateAlternateColorCodes('&', "&b[ItemFixer] &eПытаюсь поставить обновление &7// &e Try to update the plugin");
+			    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+			    console.sendMessage(message);
+			    console.sendMessage(message2);
+			    console.sendMessage(message3);
+				plugin.Update();
 			}
 		}
 	}
@@ -46,12 +52,12 @@ public class UpdateChecker implements Runnable {
 				
 			}
 		} catch (MalformedURLException e2) {
-			String message = ChatColor.translateAlternateColorCodes('&', "&4Не удалось установить соединение с сервером проверки версии &e:( &7// &4Can't connect to server");
+			String message = ChatColor.translateAlternateColorCodes('&', "&b[ItemFixer] &4Не удалось установить соединение с сервером проверки версии &e:( &7// &4Can't connect to server");
 			ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 			console.sendMessage(message);
 			return false;
 		} catch (IOException e) {
-			String message = ChatColor.translateAlternateColorCodes('&', "&4Не удалось установить соединение с сервером проверки версии &e:( &7// &4Can't connect to server");
+			String message = ChatColor.translateAlternateColorCodes('&', "&b[ItemFixer] &4Не удалось установить соединение с сервером проверки версии &e:( &7// &4Can't connect to server");
 			ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 			console.sendMessage(message);
 			return false;
