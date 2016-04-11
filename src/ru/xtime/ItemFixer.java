@@ -37,6 +37,7 @@ public class ItemFixer extends JavaPlugin {
 		    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 		    console.sendMessage(message);
 		    console.sendMessage(message2);
+		    Update();
 		} else {
 		    String message = ChatColor.translateAlternateColorCodes('&', "&b[ItemFixer] &aОбновление не найдено! &7// &aUpdate not found");
 		    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
