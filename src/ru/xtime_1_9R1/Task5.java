@@ -33,6 +33,24 @@ public class Task5 implements Runnable {
 						ru.xtime_1_9R1.Checks.removeEnt(it);
 					}
 				}
+				for (ItemStack it : p.getInventory().getExtraContents()) {
+					if (it != null) {
+						final boolean a = ru.xtime_1_9R1.Checks.checkAttributes(it);
+						if (a) {
+							p.getInventory().setExtraContents(null);
+						}
+						ru.xtime_1_9R1.Checks.removeEnt(it);
+					}
+				}
+				for (ItemStack it : p.getInventory().getArmorContents()) {
+					if (it != null) {
+						final boolean a = ru.xtime_1_9R1.Checks.checkAttributes(it);
+						if (a) {
+							p.getInventory().setArmorContents(null);
+						}
+						ru.xtime_1_9R1.Checks.removeEnt(it);
+					}
+				}
 			}
 		}
 	}
