@@ -1,11 +1,5 @@
 package ru.xtime;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
@@ -15,9 +9,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class ItemFixer extends JavaPlugin {
 	private String ItemFixer;
-	
+    static ItemFixer plugin;
+
 	public void onEnable() {
+		plugin = this;
 		if (setupItemFixer()) {
+			Bukkit.getScheduler().runTaskTimerAsynchronously((Plugin)this, (Runnable)new UpdateChecker(), 6000L, 6000L);
 		    String message = ChatColor.translateAlternateColorCodes('&', "&aПлагин включен! &7// &aPlugin enabled");
 		    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 		    console.sendMessage(message);
@@ -27,8 +24,7 @@ public class ItemFixer extends JavaPlugin {
 		    console.sendMessage(message);
 			Bukkit.getPluginManager().disablePlugin(this);
 		}
-		if (isUpdate()) {
-			Bukkit.getScheduler().runTaskTimerAsynchronously((Plugin)this, (Runnable)new ru.xtime.Task6(), 36000L, 36000L);
+		if (UpdateChecker.isUpdate()) {
 		    String message = ChatColor.translateAlternateColorCodes('&', "&aЕсть обновление. &chttp://rubukkit.org/threads/119485/ &7// &aNew update found");
 		    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 		    console.sendMessage(message);
@@ -38,45 +34,6 @@ public class ItemFixer extends JavaPlugin {
 		    console.sendMessage(message);
 		}
 	}	
-	public boolean isUpdate() {
-		try {
-	        String sourceLine = null;
-	        
-	        URL address;
-				address = new URL("http://151.80.108.152/version.txt");
-
-				InputStreamReader pageInput;
-			try {
-			pageInput = new InputStreamReader(address.openStream());
-			} catch (IOException e1) {
-			    String message = ChatColor.translateAlternateColorCodes('&', "&4Не удалось установить соединение с сервером проверки версии &e:( &7// &4Can't connect to server");
-			    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-			    console.sendMessage(message);
-	        	return false;
-			}
-	        BufferedReader source = new BufferedReader(pageInput);
-	        sourceLine = source.readLine();
-	        Integer int1 = Integer.valueOf(sourceLine);
-	        Integer version = Integer.valueOf(Bukkit.getPluginManager().getPlugin("ItemFixer").getDescription().getDescription().toString());
-	        if(int1 > version){
-	            return true;
-	        } else {
-	        	return false;
-
-	    }
-		} catch (MalformedURLException e2) {
-		    String message = ChatColor.translateAlternateColorCodes('&', "&4Не удалось установить соединение с сервером проверки версии &e:( &7// &4Can't connect to server");
-		    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-		    console.sendMessage(message);
-		    return false;
-		} catch (IOException e) {
-		    String message = ChatColor.translateAlternateColorCodes('&', "&4Не удалось установить соединение с сервером проверки версии &e:( &7// &4Can't connect to server");
-		    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-		    console.sendMessage(message);
-		    return false;
-        }
-		
-	}
 	private boolean setupItemFixer() {
 		String version;
 		try {
