@@ -6,6 +6,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -57,7 +58,19 @@ public class ItemFixer extends JavaPlugin {
 			this.getServer().getPluginManager().registerEvents((Listener)new ru.xtime_1_8_R3.XListener(), (Plugin)this);
 			Bukkit.getScheduler().runTaskTimerAsynchronously((Plugin)this, (Runnable)new ru.xtime_1_8_R3.Task5(), 20L, 20L);
 			return true;
-		}  
+		} else if (version.equals("v1_8_R2")) {
+			this.getServer().getPluginManager().registerEvents((Listener)new ru.xtime_1_8_R2.XListener(), (Plugin)this);
+			Bukkit.getScheduler().runTaskTimer((Plugin)this, (Runnable)new ru.xtime_1_8_R2.Task5(), 20L, 20L);
+			return true;
+		} else if (version.equals("v1_8_R1")) {
+			this.getServer().getPluginManager().registerEvents((Listener)new ru.xtime_1_8_R1.XListener(), (Plugin)this);
+			Bukkit.getScheduler().runTaskTimer((Plugin)this, (Runnable)new ru.xtime_1_8_R1.Task5(), 20L, 20L);
+			return true;
+		} else if (version.equals("v1_7_R4")) {
+			this.getServer().getPluginManager().registerEvents((Listener)new ru.xtime_1_7_R4.XListener(), (Plugin)this);
+			Bukkit.getScheduler().runTaskTimer((Plugin)this, (Runnable)new ru.xtime_1_7_R4.Task5(), 20L, 20L);
+			return true;
+		}     
 		return false;
 	}
     @SuppressWarnings("deprecation")
@@ -92,6 +105,7 @@ public class ItemFixer extends JavaPlugin {
             Bukkit.getPluginManager().enablePlugin(p);
     		return true;
         }catch(Exception e){
+        	this.getLogger().log(Level.WARNING, "Ошибка при обновлении плагина! Обновите плагин вручную! http:rubukkit.org/threads/119485/", e);
         	return false;
         }
     }

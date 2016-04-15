@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -15,7 +16,20 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 
-public class XListener implements Listener{  
+public class XListener implements Listener{
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	public void onDamage(EntityDamageByEntityEvent event){
+		if (event.getDamager() instanceof Player ) {
+			Player player2 = (Player) event.getDamager();
+			if (!player2.hasPermission("itemfixer.bypass")) {
+				final ItemStack item = player2.getItemInHand();
+				boolean a = ru.xtime_1_8_R3.Checks.checkAttributes(item);
+				if (a) {
+					event.setCancelled(a);
+				}
+			}
+		}
+	}
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	public void onPickupItem(final PlayerPickupItemEvent e) {
 		Player player = e.getPlayer();
