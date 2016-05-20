@@ -1,6 +1,7 @@
 package ru.xtime_1_8_R1;
 
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,7 +20,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 public class XListener implements Listener{
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	public void onDamage(EntityDamageByEntityEvent event){
-		if (event.getDamager() instanceof Player ) {
+		if (event.getDamager().getType() == EntityType.PLAYER ) {
 			Player player2 = (Player) event.getDamager();
 			if (!player2.hasPermission("itemfixer.bypass")) {
 				final ItemStack item = player2.getItemInHand();

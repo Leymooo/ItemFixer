@@ -2,6 +2,7 @@ package ru.xtime_1_9R1;
 
 import org.bukkit.Material;
 import org.bukkit.entity.AreaEffectCloud;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TippedArrow;
@@ -23,7 +24,7 @@ public class XListener implements Listener{
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	public void onDamage(EntityDamageByEntityEvent event){
 		if(event.getEntity() instanceof Player) {
-			if(event.getDamager() instanceof TippedArrow){
+			if(event.getDamager().getType() == EntityType.TIPPED_ARROW){
 				TippedArrow arrow = (TippedArrow) event.getDamager();
 				if (arrow.getShooter() instanceof Player) {
 					Player p =  (Player) arrow.getShooter();
@@ -35,7 +36,7 @@ public class XListener implements Listener{
 					}
 				}
 			}
-			if (event.getDamager() instanceof AreaEffectCloud) {
+			if (event.getDamager().getType() == EntityType.AREA_EFFECT_CLOUD) {
 				AreaEffectCloud arc = (AreaEffectCloud) event.getDamager();
 				if (arc.hasCustomEffects()) {
 					event.setCancelled(true);
@@ -43,7 +44,7 @@ public class XListener implements Listener{
 				}
 			}
 		}
-		if (event.getDamager() instanceof Player ) {
+		if (event.getDamager().getType() == EntityType.PLAYER) {
 			Player player2 = (Player) event.getDamager();
 			if (!player2.hasPermission("itemfixer.bypass")) {
 				final ItemStack item = player2.getInventory().getItemInMainHand();

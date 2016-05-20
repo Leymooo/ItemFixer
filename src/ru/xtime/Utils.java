@@ -13,11 +13,6 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredListener;
 
 public class Utils {
-	ItemFixer plugin;
-	
-	public Utils() {
-        this.plugin = ItemFixer.plugin;
-	}
     @SuppressWarnings("unchecked")
 	public static boolean unload(Plugin plugin) {
 

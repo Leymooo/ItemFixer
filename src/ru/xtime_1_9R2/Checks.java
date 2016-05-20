@@ -1,11 +1,11 @@
-package ru.xtime_1_7_R4;
+package ru.xtime_1_9R2;
 
 import java.util.Map;
 
-import net.minecraft.server.v1_7_R4.NBTTagCompound;
+import net.minecraft.server.v1_9_R2.NBTTagCompound;
 
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_7_R4.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -30,25 +30,31 @@ public class Checks
 		return b;
 	}
     
-	public static boolean checkAttributes(final ItemStack item) {
-		final CraftItemStack craft = getCraftVersion(item);
-		final NBTTagCompound NBT = new NBTTagCompound();
-		if (craft != null && item.getType() != Material.AIR && item != null) {
-			CraftItemStack.asNMSCopy((ItemStack)craft).save(NBT);
+    public static boolean checkAttributes(final ItemStack item) {
+        final CraftItemStack craft = getCraftVersion(item);
+        final NBTTagCompound NBT = new NBTTagCompound();
+        if (craft != null && item.getType() != Material.AIR && item != null) {
+            CraftItemStack.asNMSCopy((ItemStack)craft).save(NBT);
             if (NBT.toString().contains("Items:") || NBT.toString().contains("ActiveEffects:") || NBT.toString().contains("Command:") || NBT.toString().contains("powered:") || NBT.toString().contains("Equipment:") || NBT.toString().contains("Fuse:") || NBT.toString().contains("CustomName:") || NBT.toString().contains("AttributeModifiers:") || NBT.toString().contains("Unbreakable:") || NBT.toString().contains("ClickEvent") || NBT.toString().contains("run_command") || NBT.toString().contains("CustomPotionEffects:")) {
-				return true;
+                return true;
             }
-		}
-		return false;
-	}
+        } if (craft != null && item.getType() == Material.ARMOR_STAND && item != null) {
+            CraftItemStack.asNMSCopy((ItemStack)craft).save(NBT);
+            if (NBT.toString().contains("EntityTag:")) {
+                return true;
+            }
+        }
+        return false;
+    }
     
-	private static CraftItemStack getCraftVersion(final ItemStack stack) {
-		if (stack instanceof CraftItemStack) {
-			return (CraftItemStack)stack;
-		}
-		if (stack != null) {
-			return CraftItemStack.asCraftCopy(stack);
-		}
-		return null;
-	}
+    
+    private static CraftItemStack getCraftVersion(final ItemStack stack) {
+        if (stack instanceof CraftItemStack) {
+            return (CraftItemStack)stack;
+        }
+        if (stack != null) {
+            return CraftItemStack.asCraftCopy(stack);
+        }
+        return null;
+    }
 }
