@@ -34,10 +34,12 @@ public class Checks
         final CraftItemStack craft = getCraftVersion(item);
         final NBTTagCompound NBT = new NBTTagCompound();
         if (craft != null && item.getType() != Material.AIR && item != null) {
+            CraftItemStack.asNMSCopy((ItemStack)craft).save(NBT);
             if (NBT.toString().contains("Items:") || NBT.toString().contains("ActiveEffects:") || NBT.toString().contains("Command:") || NBT.toString().contains("powered:") || NBT.toString().contains("Equipment:") || NBT.toString().contains("Fuse:") || NBT.toString().contains("CustomName:") || NBT.toString().contains("AttributeModifiers:") || NBT.toString().contains("Unbreakable:") || NBT.toString().contains("ClickEvent") || NBT.toString().contains("run_command") || NBT.toString().contains("CustomPotionEffects:")) {
                 return true;
             }
         } if (craft != null && item.getType() == Material.ARMOR_STAND && item != null) {
+            CraftItemStack.asNMSCopy((ItemStack)craft).save(NBT);
             if (NBT.toString().contains("EntityTag:")) {
                 return true;
             }
