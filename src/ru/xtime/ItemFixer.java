@@ -70,7 +70,7 @@ public class ItemFixer extends JavaPlugin implements Runnable {
 		return false;
 	}
 	@SuppressWarnings("deprecation")
-	public boolean Update(){
+	public void Update(){
 		try {
 			for (Thread thread : Thread.getAllStackTraces().keySet()) {
 				if (thread.getClass().getClassLoader() == this.getClass().getClassLoader()) {
@@ -82,12 +82,11 @@ public class ItemFixer extends JavaPlugin implements Runnable {
 				}
 			}
 			Plugin p = Bukkit.getPluginManager().getPlugin("ItemFixer");
-			Bukkit.getScheduler().cancelTasks(this);
 			Utils.unload(p);
 			((URLClassLoader)this.getClass().getClassLoader()).close();
 			System.gc();
 			String url="https://www.dropbox.com/s/ztxjbwn4vzdyiyb/ItemFixer.jar?dl=1";
-			String filename = this.getFile().getName().toString();
+			String filename = getFile().getName().toString();
 			URL download = new URL(url);
 			ReadableByteChannel rbc = Channels.newChannel(download.openStream());
 			FileOutputStream fileOut = new FileOutputStream("plugins/"+filename);
@@ -98,10 +97,10 @@ public class ItemFixer extends JavaPlugin implements Runnable {
 			Bukkit.getPluginManager().loadPlugin(new File("plugins/"+filename));
 			p = Bukkit.getPluginManager().getPlugin("ItemFixer");
 			Bukkit.getPluginManager().enablePlugin(p);
-			return true;
+			return;
 		}catch(Exception e){
-			this.getLogger().log(Level.WARNING, "Ошибка при обновлении плагина! Обновите плагин вручную! http:rubukkit.org/threads/119485/", e);
-			return false;
+			Bukkit.getLogger().log(Level.WARNING, "Ошибка при обновлении плагина! Обновите плагин вручную! http:rubukkit.org/threads/119485/", e);
+			return;
 		}
 	}
 	@Override
@@ -157,5 +156,6 @@ public class ItemFixer extends JavaPlugin implements Runnable {
 			return false;
 		}
 	}
+
 }
 

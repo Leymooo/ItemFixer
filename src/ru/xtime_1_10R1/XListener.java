@@ -21,6 +21,14 @@ import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 public class XListener implements Listener{  
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	public void onDamage(EntityDamageByEntityEvent event){
+		if (event.getEntity().getType() != EntityType.PLAYER && event.getDamage() > 21) {
+			event.setCancelled(true);
+			return;
+		}
+		if (event.getEntity().getType() == EntityType.PLAYER && event.getDamage() > 14) {
+			event.setCancelled(true);
+			return;
+		}
 		if(event.getEntity().getType() == EntityType.PLAYER && event.getDamager().getType() == EntityType.TIPPED_ARROW) {
 			TippedArrow arrow = (TippedArrow) event.getDamager();
 			if (((Entity) arrow.getShooter()).getType() == EntityType.PLAYER ) {
@@ -46,10 +54,10 @@ public class XListener implements Listener{
 			if (!player2.hasPermission("itemfixer.bypass")) {
 				event.setCancelled(Checks.checkAttributes(player2.getInventory().getItemInMainHand()));
 				Checks.removeEnt(player2.getInventory().getItemInMainHand());
+				return;
 			}
 		}
 	}
-
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	public void onPickupItem(final PlayerPickupItemEvent e) {
 		if (!e.getPlayer().hasPermission("itemfixer.bypass")) {
