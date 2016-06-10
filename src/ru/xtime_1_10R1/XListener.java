@@ -1,8 +1,11 @@
-package ru.xtime_1_8_R2;
+package ru.xtime_1_10R1;
 
 import org.bukkit.Material;
+import org.bukkit.entity.AreaEffectCloud;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TippedArrow;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -13,15 +16,36 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 
 public class XListener implements Listener{  
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	public void onDamage(EntityDamageByEntityEvent event){
+		if(event.getEntity().getType() == EntityType.PLAYER && event.getDamager().getType() == EntityType.TIPPED_ARROW) {
+			TippedArrow arrow = (TippedArrow) event.getDamager();
+			if (((Entity) arrow.getShooter()).getType() == EntityType.PLAYER ) {
+				Player p =  (Player) arrow.getShooter();
+				if (!p.hasPermission("itemfixer.bypass")) {
+					if (arrow.hasCustomEffects()) {
+						event.setCancelled(true);
+						return;
+					}
+				}
+			}
+		}
+		if (event.getDamager().getType() == EntityType.AREA_EFFECT_CLOUD) {
+			AreaEffectCloud arc = (AreaEffectCloud) event.getDamager();
+			if (arc.hasCustomEffects()) {
+				event.setCancelled(true);
+				arc.remove();
+				return;
+			}
+		}
 		if (event.getDamager().getType() == EntityType.PLAYER) {
 			Player player2 = (Player) event.getDamager();
 			if (!player2.hasPermission("itemfixer.bypass")) {
-				event.setCancelled(Checks.checkAttributes(player2.getInventory().getItemInHand()));
-				Checks.removeEnt(player2.getInventory().getItemInHand());
+				event.setCancelled(Checks.checkAttributes(player2.getInventory().getItemInMainHand()));
+				Checks.removeEnt(player2.getInventory().getItemInMainHand());
 			}
 		}
 	}
@@ -67,6 +91,20 @@ public class XListener implements Listener{
 				e.setCancelled(Checks.checkAttributes(e.getItem()));
 				Checks.removeEnt(e.getItem());
 			}
+		}
+	}
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	public void OnSwap(PlayerSwapHandItemsEvent e ){
+		if (!e.getPlayer().hasPermission("itemfixer.bypass")) {
+			e.setCancelled(Checks.checkAttributes(e.getOffHandItem()));
+			Checks.removeEnt(e.getOffHandItem());
+		}
+	}
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	public void OnSwap2(PlayerSwapHandItemsEvent e ){
+		if (!e.getPlayer().hasPermission("itemfixer.bypass")) {
+			e.setCancelled(Checks.checkAttributes(e.getMainHandItem()));
+			Checks.removeEnt(e.getMainHandItem());
 		}
 	}
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)

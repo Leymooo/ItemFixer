@@ -7,11 +7,12 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class Task5 implements Runnable {
+	@Override
 	public void run() {
 		for (final Player p : Bukkit.getServer().getOnlinePlayers()) {
 			if (!p.hasPermission("itemfixer.bypass")) {
 				for (final PotionEffect pe : p.getActivePotionEffects()) {
-					if (pe.getType().equals((Object)PotionEffectType.REGENERATION)) {
+					if (pe.getType().equals(PotionEffectType.REGENERATION)) {
 						if (pe.getAmplifier() <= 4) {
 							continue;
 						}
@@ -25,20 +26,20 @@ public class Task5 implements Runnable {
 				}
 				for (ItemStack it : p.getInventory().getContents()) {
 					if (it != null) {
-						final boolean a = ru.xtime_1_8_R1.Checks.checkAttributes(it);
+						final boolean a = Checks.checkAttributes(it);
 						if (a) {
 							p.getInventory().remove(it);
 						}
-						ru.xtime_1_8_R1.Checks.removeEnt(it);
+						Checks.removeEnt(it);
 					}
 				}
 				for (ItemStack it2 : p.getInventory().getArmorContents()) {
 					if (it2 !=null) {
-						final boolean a = ru.xtime_1_8_R1.Checks.checkAttributes(it2);
+						final boolean a = Checks.checkAttributes(it2);
 						if (a) {
 							p.getEquipment().setArmorContents(null);
 						}
-						ru.xtime_1_8_R1.Checks.removeEnt(it2);
+						Checks.removeEnt(it2);
 					}
 				}
 			}
