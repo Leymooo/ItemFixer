@@ -17,14 +17,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 public class XListener implements Listener{  
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	public void onDamage(EntityDamageByEntityEvent event){
-		if (event.getEntity().getType() != EntityType.PLAYER && event.getDamage() > 21) {
-			event.setCancelled(true);
-			return;
-		}
-		if (event.getEntity().getType() == EntityType.PLAYER && event.getDamage() > 14) {
-			event.setCancelled(true);
-			return;
-		}
 		if (event.getDamager().getType() == EntityType.PLAYER) {
 			Player player2 = (Player) event.getDamager();
 			if (!player2.hasPermission("itemfixer.bypass")) {
