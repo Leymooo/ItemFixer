@@ -5,18 +5,21 @@ import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.TippedArrow;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.potion.PotionEffect;
 
 public class XListener implements Listener{  
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -128,6 +131,20 @@ public class XListener implements Listener{
 		e.setCancelled(Checks.checkAttributes(e.getItem()));
 		if (Checks.removeEnt(e.getItem())) {
 			e.setCancelled(true);
+		}
+	}
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	public void OnLaunch (ProjectileLaunchEvent e){
+		if (e.getEntityType() == EntityType.SPLASH_POTION || e.getEntityType() == EntityType.LINGERING_POTION && ((Entity) e.getEntity().getShooter()).getType() == EntityType.PLAYER) {
+			Player pl = (Player) e.getEntity().getShooter();
+			if (!pl.hasPermission("itemfixer.bypass")) {
+				ThrownPotion p = (ThrownPotion) e.getEntity();
+				for (PotionEffect pe : p.getEffects()) {
+					if (pe.getAmplifier() > 1 || pe.getDuration() > 9600) {
+						e.setCancelled(true);
+					}
+				}
+			}
 		}
 	}
 }
