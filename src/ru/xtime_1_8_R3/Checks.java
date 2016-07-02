@@ -13,7 +13,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class Checks
 {
 	public static boolean removeEnt(final ItemStack item) {
-		boolean b = false;
 		if (item != null) {
 			if (item.getEnchantments() != null) {
 				for (final Map.Entry<Enchantment, Integer> ench : item.getEnchantments().entrySet()) {
@@ -22,31 +21,35 @@ public class Checks
 						final ItemMeta meta = item.getItemMeta();
 						meta.removeEnchant(Enchant);
 						item.setItemMeta(meta);
-						b = true;
+						return true;
 					}
 				}
 			}
 		}
-		return b;
+		return false;
 	}
-    
+
 	public static boolean checkAttributes(final ItemStack item) {
 		final CraftItemStack craft = getCraftVersion(item);
 		final NBTTagCompound NBT = new NBTTagCompound();
 		if (craft != null && item.getType() != Material.AIR && item != null) {
 			CraftItemStack.asNMSCopy((ItemStack)craft).save(NBT);
-            if (NBT.toString().contains("Items:") || NBT.toString().contains("ActiveEffects:") || NBT.toString().contains("Command:") || NBT.toString().contains("powered:") || NBT.toString().contains("Equipment:") || NBT.toString().contains("Fuse:") || NBT.toString().contains("CustomName:") || NBT.toString().contains("AttributeModifiers:") || NBT.toString().contains("Unbreakable:") || NBT.toString().contains("ClickEvent") || NBT.toString().contains("run_command") || NBT.toString().contains("CustomPotionEffects:")) {
+			final String NBTS = NBT.toString();
+			if (NBTS.contains("Items:") || NBTS.contains("ActiveEffects:") || NBTS.contains("Command:") || NBTS.contains("powered:") || NBTS.contains("Equipment:") || NBTS.contains("Fuse:") || NBTS.contains("CustomName:") || NBTS.contains("AttributeModifiers:") || NBTS.contains("Unbreakable:") || NBTS.contains("ClickEvent") || NBTS.contains("run_command") || NBTS.contains("CustomPotionEffects:")) {
 				return true;
 			}
-		}  if (craft != null && item.getType() == Material.ARMOR_STAND && item != null) {
+		} 
+		if (craft != null && item.getType() == Material.ARMOR_STAND && item != null) {
 			CraftItemStack.asNMSCopy((ItemStack)craft).save(NBT);
-			if (NBT.toString().contains("EntityTag:")) {
+			final String NBTS = NBT.toString();
+			if (NBTS.contains("EntityTag:")) {
 				return true;
 			}
 		}
 		return false;
 	}
-    
+
+
 	private static CraftItemStack getCraftVersion(final ItemStack stack) {
 		if (stack instanceof CraftItemStack) {
 			return (CraftItemStack)stack;

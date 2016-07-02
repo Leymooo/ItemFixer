@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
+
 public class XListener implements Listener{  
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onDamage(EntityDamageByEntityEvent event){
@@ -21,7 +22,9 @@ public class XListener implements Listener{
 			Player player2 = (Player) event.getDamager();
 			if (!player2.hasPermission("itemfixer.bypass")) {
 				event.setCancelled(Checks.checkAttributes(player2.getInventory().getItemInHand()));
-				Checks.removeEnt(player2.getInventory().getItemInHand());
+				if (Checks.removeEnt(player2.getInventory().getItemInHand())) {
+					event.setCancelled(true);
+				}
 			}
 		}
 	}
@@ -30,7 +33,9 @@ public class XListener implements Listener{
 	public void onPickupItem(final PlayerPickupItemEvent e) {
 		if (!e.getPlayer().hasPermission("itemfixer.bypass")) {
 			e.setCancelled(Checks.checkAttributes(e.getItem().getItemStack()));
-			Checks.removeEnt(e.getItem().getItemStack());
+			if (Checks.removeEnt(e.getItem().getItemStack())){
+				e.setCancelled(true);
+			}
 		}
 	}
 
@@ -39,7 +44,9 @@ public class XListener implements Listener{
 		if (e.getCurrentItem() != null) {
 			if (!e.getWhoClicked().hasPermission("itemfixer.bypass")) {
 				e.setCancelled(Checks.checkAttributes(e.getCurrentItem()));
-				Checks.removeEnt(e.getCurrentItem());
+				if (Checks.removeEnt(e.getCurrentItem())) {
+					e.setCancelled(true);
+				}
 			}
 		}
 	}
@@ -48,7 +55,9 @@ public class XListener implements Listener{
 	public void onPlayerInteract(final PlayerInteractEvent e) {
 		if (!e.getPlayer().hasPermission("itemfixer.bypass") && e.getItem() != null) {
 			e.setCancelled(Checks.checkAttributes(e.getItem()));
-			Checks.removeEnt(e.getItem());
+			if (Checks.removeEnt(e.getItem())) {
+				e.setCancelled(true);
+			}
 		}
 	}
 
@@ -56,7 +65,9 @@ public class XListener implements Listener{
 	public void onItemDrop(final PlayerDropItemEvent e) {
 		if (!e.getPlayer().hasPermission("itemfixer.bypass")) {
 			e.setCancelled(Checks.checkAttributes(e.getItemDrop().getItemStack()));
-			Checks.removeEnt(e.getItemDrop().getItemStack());
+			if (Checks.removeEnt(e.getItemDrop().getItemStack())) {
+				e.setCancelled(true);
+			}
 		}
 	}
 
@@ -65,14 +76,17 @@ public class XListener implements Listener{
 		if (!e.getPlayer().hasPermission("itemfixer.bypass")) {
 			if (e.getItem().getType() == Material.POTION) {
 				e.setCancelled(Checks.checkAttributes(e.getItem()));
-				Checks.removeEnt(e.getItem());
+				if (Checks.removeEnt(e.getItem())) {
+					e.setCancelled(true);
+				}
 			}
 		}
 	}
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void OnLaunch2 (BlockDispenseEvent e){
 		e.setCancelled(Checks.checkAttributes(e.getItem()));
-		Checks.removeEnt(e.getItem());
+		if (Checks.removeEnt(e.getItem())) {
+			e.setCancelled(true);
+		}
 	}
 }
-

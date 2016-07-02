@@ -32,31 +32,31 @@ public class ItemFixer extends JavaPlugin implements Runnable {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&aServer version &c" + version));
 		if (version.equals("v1_10_R1")) {
 			Bukkit.getPluginManager().registerEvents(new ru.xtime_1_10R1.XListener(), this);
-			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_10R1.Task5(), 20L, 20L);
+			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_10R1.Task5(), 300L, 300L);
 			return true;
 		} else if (version.equals("v1_9_R2")) {
 			Bukkit.getPluginManager().registerEvents(new ru.xtime_1_9R2.XListener(), this);
-			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_9R2.Task5(), 20L, 20L);
+			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_9R2.Task5(), 300L, 300L);
 			return true;
 		} else if (version.equals("v1_9_R1")) {
 			Bukkit.getPluginManager().registerEvents(new ru.xtime_1_9R1.XListener(), this);
-			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_9R1.Task5(), 20L, 20L);
+			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_9R1.Task5(), 300L, 300L);
 			return true;
 		} else if (version.equals("v1_8_R3")) {
 			Bukkit.getPluginManager().registerEvents(new ru.xtime_1_8_R3.XListener(), this);
-			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_8_R3.Task5(), 20L, 20L);
+			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_8_R3.Task5(), 300L, 300L);
 			return true;
 		} else if (version.equals("v1_8_R2")) {
 			Bukkit.getPluginManager().registerEvents(new ru.xtime_1_8_R2.XListener(), this);
-			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_8_R2.Task5(), 20L, 20L);
+			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_8_R2.Task5(), 300L, 300L);
 			return true;
 		} else if (version.equals("v1_8_R1")) {
 			Bukkit.getPluginManager().registerEvents(new ru.xtime_1_8_R1.XListener(), this);
-			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_8_R1.Task5(), 20L, 20L);
+			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_8_R1.Task5(), 300L, 300L);
 			return true;
 		} else if (version.equals("v1_7_R4")) {
 			Bukkit.getPluginManager().registerEvents(new ru.xtime_1_7_R4.XListener(), this);
-			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_7_R4.Task5(), 20L, 20L);
+			Bukkit.getScheduler().runTaskTimerAsynchronously(this, new ru.xtime_1_7_R4.Task5(), 300L, 300L);
 			return true;
 		}     
 		return false;
