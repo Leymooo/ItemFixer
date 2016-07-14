@@ -135,7 +135,7 @@ public class XListener implements Listener{
 	}
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void OnLaunch (ProjectileLaunchEvent e){
-		if (e.getEntityType() == EntityType.SPLASH_POTION || e.getEntityType() == EntityType.LINGERING_POTION && ((Entity) e.getEntity().getShooter()).getType() == EntityType.PLAYER) {
+		if ((e.getEntityType() == EntityType.SPLASH_POTION || e.getEntityType() == EntityType.LINGERING_POTION) && ((Entity) e.getEntity().getShooter()).getType() == EntityType.PLAYER) {
 			Player pl = (Player) e.getEntity().getShooter();
 			if (!pl.hasPermission("itemfixer.bypass")) {
 				ThrownPotion p = (ThrownPotion) e.getEntity();
