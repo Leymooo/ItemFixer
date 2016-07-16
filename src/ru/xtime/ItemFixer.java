@@ -97,7 +97,7 @@ public class ItemFixer extends JavaPlugin implements Runnable {
         } catch (IOException | NumberFormatException e) {
             this.msgToCS(
                     "&4Не удалось проверить обновление &e:( &7// &4Can't check update",
-                    "&b[ItemFixer] &eНапишите ошибку ниже сюда: &chttp://rubukkit.org/threads/119485"
+                    "&eНапишите ошибку ниже сюда: &chttp://rubukkit.org/threads/119485"
             );
             this.getLogger().log(Level.WARNING, "Ошибка: ", e);
         }
