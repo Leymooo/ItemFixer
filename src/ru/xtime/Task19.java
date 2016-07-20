@@ -1,4 +1,4 @@
-package ru.xtime_1_8_R3;
+package ru.xtime;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -6,40 +6,38 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class Task5 implements Runnable {
+public class Task19 implements Runnable {
 	@Override
 	public void run() {
 		for (final Player p : Bukkit.getServer().getOnlinePlayers()) {
 			if (!p.hasPermission("itemfixer.bypass")) {
 				for (final PotionEffect pe : p.getActivePotionEffects()) {
-					if (pe.getType().equals(PotionEffectType.REGENERATION)) {
+					if (pe.getType().equals(PotionEffectType.ABSORPTION)) {
 						if (pe.getAmplifier() <= 4) {
 							continue;
-						}
+						}	
 						p.removePotionEffect(pe.getType());
-					} else {
+					}
+					else {
 						if (pe.getAmplifier() <= 1) {
 							continue;
 						}
 						p.removePotionEffect(pe.getType());
 					}
 				}
-				for (ItemStack it : p.getInventory().getContents()) {
+				for (ItemStack it : p.getInventory().getStorageContents()) {
 					if (it != null) {
-						final boolean a = Checks.checkAttributes(it);
-						if (a) {
-							p.getInventory().remove(it);
-						}
-						Checks.removeEnt(it);
+						Reflection.removeNbt(it);
 					}
 				}
-				for (ItemStack it2 : p.getInventory().getArmorContents()) {
-					if (it2 !=null) {
-						final boolean a = Checks.checkAttributes(it2);
-						if (a) {
-							p.getEquipment().setArmorContents(null);
-						}
-						Checks.removeEnt(it2);
+				for (ItemStack it : p.getInventory().getExtraContents()) {
+					if (it != null) {
+						Reflection.removeNbt(it);
+					}
+				}
+				for (ItemStack it : p.getInventory().getArmorContents()) {
+					if (it != null) {
+						Reflection.removeNbt(it);
 					}
 				}
 			}
