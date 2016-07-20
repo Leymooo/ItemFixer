@@ -28,28 +28,28 @@ public class ItemFixer extends JavaPlugin implements Runnable {
     }
 
     private boolean setupItemFixer() {
-		Reflection.nbt.add("Items");
-		Reflection.nbt.add("ActiveEffects");
-		Reflection.nbt.add("Command");
-		Reflection.nbt.add("powered");
-		Reflection.nbt.add("Equipment");
-		Reflection.nbt.add("Fuse");
-		Reflection.nbt.add("CustomName");
-		Reflection.nbt.add("AttributeModifiers");
-		Reflection.nbt.add("Unbreakable");
-		Reflection.nbt.add("ClickEvent");
-		Reflection.nbt.add("run_command");
-		Reflection.nbt.add("CustomPotionEffects");
+        Reflection.nbt.add("Items");
+        Reflection.nbt.add("ActiveEffects");
+        Reflection.nbt.add("Command");
+        Reflection.nbt.add("powered");
+        Reflection.nbt.add("Equipment");
+        Reflection.nbt.add("Fuse");
+        Reflection.nbt.add("CustomName");
+        Reflection.nbt.add("AttributeModifiers");
+        Reflection.nbt.add("Unbreakable");
+        Reflection.nbt.add("ClickEvent");
+        Reflection.nbt.add("run_command");
+        Reflection.nbt.add("CustomPotionEffects");
         String version = this.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
         this.msgToCS("&aServer version &c" + version);
         if (version.equals("v1_10_R1") || version.equals("v1_9_R1") || version.equals("v1_9_R2")) {
             Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Task19(), 20L, 20L);
-    		return true;
+            return true;
         } else if (version.equals("v1_8_R1") || version.equals("v1_8_R2") || version.equals("v1_8_R3") || version.equals("v1_7_R4")) {
             Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Task17(), 20L, 20L);
-    		return true;
+            return true;
         }
-		return false;
+        return false;
     }
 
     @Override
