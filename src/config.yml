@@ -4,12 +4,21 @@ nbt:
   - Items
   - ActiveEffects
   - Command
-  - powered
-  - Equipment
-  - Fuse
   - CustomName
   - AttributeModifiers
   - Unbreakable
+  - CustomPotionEffects
+spawneggs:
+  - Fuse
+  - CustomName
+  - powered
+  - ActiveEffects
+  - ExplosionPower
+armorstand:
+  - EntityTag
+writenbook:
   - ClickEvent
   - run_command
-  - CustomPotionEffects
+inventory:
+#Chest, Dropper, TrappedChest, Dispenser
+  - BlockEntityTag

@@ -9,37 +9,38 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 
 public class Main extends JavaPlugin implements Runnable {
     Boolean hasUpdates;
     private ArrayList<String> nbt = new ArrayList<String>();
+    private ArrayList<String> eggs = new ArrayList<String>();
+    private ArrayList<String> armor = new ArrayList<String>();
+    private ArrayList<String> book = new ArrayList<String>();
+    private ArrayList<String> inventory = new ArrayList<String>();
     public void onEnable() {
         hasUpdates = false;
         this.saveDefaultConfig();
         nbt.addAll(this.getConfig().getStringList("nbt"));
+        eggs.addAll(this.getConfig().getStringList("spawneggs"));
+        armor.addAll(this.getConfig().getStringList("armorstand"));
+        book.addAll(this.getConfig().getStringList("writenbook"));
+        inventory.addAll(this.getConfig().getStringList("inventory"));
+        ProtocolLibrary.getProtocolManager().addPacketListener(new NBTArmListener(this));
+        ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
+
         this.checkUpdate();
         this.getServer().getScheduler().runTaskTimerAsynchronously(this, this, 0, 18000L);
-        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this, ListenerPriority.HIGHEST, PacketType.Play.Client.SET_CREATIVE_SLOT) {
-            @Override
-            public void onPacketReceiving(PacketEvent event) {
-                if (event.getPacketType() != PacketType.Play.Client.SET_CREATIVE_SLOT) return;
-                if (event.getPlayer().hasPermission("itemfixer.bypass")) return;
-                ItemStack stack = event.getPacket().getItemModifier().read(0);
-                if (isExploit(stack) )  event.getPlayer().sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
-            }
-        });
+
         this.msgToCS("&aItemFixer включен");
     }
     private void removeEnt(final ItemStack item) {
@@ -59,26 +60,50 @@ public class Main extends JavaPlugin implements Runnable {
         return;
     }
 
-    private boolean isExploit(ItemStack stack) {
+    public boolean isExploit(ItemStack stack, Player p) {
+        boolean b = false;
         try {
             removeEnt(stack);
+            Material mat = stack.getType();
             NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(stack);
-            if (isExploit(tag)) {
-                return true;
+            for (String a : nbt) {
+                if (tag.containsKey(a)) {
+                    tag.remove(a);
+                    b = true;
+                }
+            }
+            if (mat == Material.CHEST || mat == Material.TRAPPED_CHEST || mat == Material.DROPPER || mat == Material.DISPENSER) {
+                for (String a : inventory) {
+                    if (tag.containsKey(a)) {
+                        tag.remove(a);
+                        b = true;
+                    }
+                }
+
+            } else if (mat == Material.ARMOR_STAND) {
+                for (String a : armor) {
+                    if (tag.containsKey(a)) {
+                        tag.remove(a);
+                        b = true;
+                    }
+                }
+            } else if (mat == Material.WRITTEN_BOOK) {
+                for (String a : book) {
+                    if (tag.toString().contains(a)) {
+                        p.getInventory().remove(stack);
+                        b = true;  
+                    }
+                }
+            } else if (mat == Material.MONSTER_EGG || mat == Material.MONSTER_EGGS) {
+                for (String a : eggs) {
+                    if (tag.toString().contains(a)) {
+                        p.getInventory().remove(stack);
+                        b = true;
+                    }
+                }
             }
         } catch (Exception e) {
-            
-        }
-        return false;
-    }
 
-    private boolean isExploit(NbtCompound root) {
-        boolean b = false;
-        for (String a : nbt) {
-            if (root.containsKey(a)) {
-                root.remove(a);
-                b = true;
-            }
         }
         return b;
     }
