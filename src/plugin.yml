@@ -1,5 +1,6 @@
 name: ItemFixer
 author: Leymooo
 main: ru.xtime.nbtfix.Main
-version: 2.6
+version: 2.5
+description: 250
 depend: [ProtocolLib]
