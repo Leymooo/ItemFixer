@@ -14,34 +14,35 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 
 public class Main extends JavaPlugin implements Runnable {
     Boolean hasUpdates;
-    @SuppressWarnings("serial")
-    private ArrayList<String> nbt = new ArrayList<String>(){{
-        add("Items");
-        add("ActiveEffects");
-        add("Command");
-        add("powered");
-        add("Equipment");
-        add("Fuse");
-        add("CustomName");
-        add("AttributeModifiers");
-        add("Unbreakable");
-        add("ClickEvent");
-        add("run_command");
-        add("CustomPotionEffects");
-    }};
+    private ArrayList<String> nbt = new ArrayList<String>();
     public void onEnable() {
         hasUpdates = false;
+        this.saveDefaultConfig();
+        nbt.addAll(this.getConfig().getStringList("nbt"));
+        this.checkUpdate();
         this.getServer().getScheduler().runTaskTimerAsynchronously(this, this, 0, 18000L);
-        ProtocolLibrary.getProtocolManager().addPacketListener(new NBTFixListener(this));
+        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this, ListenerPriority.HIGHEST, PacketType.Play.Client.SET_CREATIVE_SLOT) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                if (event.getPacketType() != PacketType.Play.Client.SET_CREATIVE_SLOT) return;
+                if (event.getPlayer().hasPermission("itemfixer.bypass")) return;
+                ItemStack stack = event.getPacket().getItemModifier().read(0);
+                if (isExploit(stack) )  event.getPlayer().sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
+            }
+        });
         this.msgToCS("&aItemFixer включен");
     }
-   private void removeEnt(final ItemStack item) {
+    private void removeEnt(final ItemStack item) {
         if (item != null) {
             if (item.getEnchantments() != null) {
                 for (final Map.Entry<Enchantment, Integer> ench : item.getEnchantments().entrySet()) {
@@ -57,8 +58,8 @@ public class Main extends JavaPlugin implements Runnable {
         }
         return;
     }
-   
-    public boolean isExploit(ItemStack stack) {
+
+    private boolean isExploit(ItemStack stack) {
         try {
             removeEnt(stack);
             NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(stack);
@@ -66,7 +67,7 @@ public class Main extends JavaPlugin implements Runnable {
                 return true;
             }
         } catch (Exception e) {
-            // NBT read failed
+            
         }
         return false;
     }
@@ -83,11 +84,14 @@ public class Main extends JavaPlugin implements Runnable {
     }
     @Override
     public void run() {
+        checkUpdate();
+    }
+    private void checkUpdate() {
         if (this.hasUpdates) {
             this.msgToCS(
                     "&cНайдено новое обновление! &7// &cNew update found",
                     "&chttp://rubukkit.org/threads/119485/"
-            );
+                    );
             return;
         }
 
@@ -100,7 +104,7 @@ public class Main extends JavaPlugin implements Runnable {
                 this.msgToCS(
                         "&cНе удалось получить описание плагина // error. No description",
                         "&aНапишите об этой ошибке сюда: &chttp://rubukkit.org/threads/119485"
-                );
+                        );
                 return;
             }
             Integer currentBuild = Integer.valueOf(this.getDescription().getDescription());
@@ -110,17 +114,15 @@ public class Main extends JavaPlugin implements Runnable {
             this.msgToCS(
                     "&4Не удалось проверить обновление &e:( &7// &4Can't check update",
                     "&eНапишите ошибку ниже сюда: &chttp://rubukkit.org/threads/119485"
-            );
+                    );
             this.getLogger().log(Level.WARNING, "Ошибка: ", e);
         }
 
         return;
     }
-
     private void msgToCS(String... message) {
         for (String line : message) {
-            this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&b[ItemFixer] ".concat(line))
-            );
+            this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&b[ItemFixer] ".concat(line)));
         }
     }
 

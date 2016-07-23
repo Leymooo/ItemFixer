@@ -1,0 +1,15 @@
+#список нбт тегов для проверки.
+nbt:
+  #ЧУВСТВИТЕЛЬНЫЙ К РЕГИСТРУ.
+  - Items
+  - ActiveEffects
+  - Command
+  - powered
+  - Equipment
+  - Fuse
+  - CustomName
+  - AttributeModifiers
+  - Unbreakable
+  - ClickEvent
+  - run_command
+  - CustomPotionEffects
