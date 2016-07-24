@@ -22,6 +22,7 @@ import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 
 public class Main extends JavaPlugin implements Runnable {
     Boolean hasUpdates;
+    Boolean mc17;
     private ArrayList<String> nbt = new ArrayList<String>();
     private ArrayList<String> eggs = new ArrayList<String>();
     private ArrayList<String> armor = new ArrayList<String>();
@@ -29,32 +30,30 @@ public class Main extends JavaPlugin implements Runnable {
     private ArrayList<String> inventory = new ArrayList<String>();
     public void onEnable() {
         hasUpdates = false;
+        mc17=this.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3].startsWith("v1_7_R");
         this.saveDefaultConfig();
         nbt.addAll(this.getConfig().getStringList("nbt"));
         eggs.addAll(this.getConfig().getStringList("spawneggs"));
         armor.addAll(this.getConfig().getStringList("armorstand"));
         book.addAll(this.getConfig().getStringList("writenbook"));
         inventory.addAll(this.getConfig().getStringList("inventory"));
-        ProtocolLibrary.getProtocolManager().addPacketListener(new NBTArmListener(this));
+        ProtocolLibrary.getProtocolManager().addPacketListener(new NBTHeldItemListener(this));
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
-
-        this.checkUpdate();
         this.getServer().getScheduler().runTaskTimerAsynchronously(this, this, 0, 18000L);
-
         this.msgToCS("&aItemFixer включен");
     }
     private void removeEnt(final ItemStack item) {
-        if (item != null) {
-            if (item.getEnchantments() != null) {
-                for (final Map.Entry<Enchantment, Integer> ench : item.getEnchantments().entrySet()) {
-                    final Enchantment Enchant = ench.getKey();
-                    if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) {
-                        final ItemMeta meta = item.getItemMeta();
-                        meta.removeEnchant(Enchant);
-                        item.setItemMeta(meta);
-                        return;
-                    }
-                }
+        if (item == null) return;
+        if (item.getType() == Material.AIR) return;
+        if (item.getEnchantments() == null) return;
+        for (final Map.Entry<Enchantment, Integer> ench : item.getEnchantments().entrySet()) {
+            final Enchantment Enchant = ench.getKey();
+            if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) {
+                final ItemMeta meta = item.getItemMeta();
+                meta.removeEnchant(Enchant);
+                item.setItemMeta(meta);
+                return;
+
             }
         }
         return;
@@ -79,14 +78,6 @@ public class Main extends JavaPlugin implements Runnable {
                         b = true;
                     }
                 }
-
-            } else if (mat == Material.ARMOR_STAND) {
-                for (String a : armor) {
-                    if (tag.containsKey(a)) {
-                        tag.remove(a);
-                        b = true;
-                    }
-                }
             } else if (mat == Material.WRITTEN_BOOK) {
                 for (String a : book) {
                     if (tag.toString().contains(a)) {
@@ -101,9 +92,16 @@ public class Main extends JavaPlugin implements Runnable {
                         b = true;
                     }
                 }
+            } else if (!mc17 && mat == Material.ARMOR_STAND) {
+                for (String a : armor) {
+                    if (tag.containsKey(a)) {
+                        tag.remove(a);
+                        b = true;
+                    }
+                }
             }
         } catch (Exception e) {
-
+            return b;
         }
         return b;
     }
@@ -112,19 +110,7 @@ public class Main extends JavaPlugin implements Runnable {
         checkUpdate();
     }
     private void checkUpdate() {
-        if (this.hasUpdates) {
-            this.msgToCS(
-                    "&cНайдено новое обновление! &7// &cNew update found",
-                    "&chttp://rubukkit.org/threads/119485/"
-                    );
-            return;
-        }
-
-        try {
-            URL address = new URL("http://151.80.108.152/version.txt");
-            InputStreamReader pageInput = new InputStreamReader(address.openStream());
-            BufferedReader source = new BufferedReader(pageInput);
-            Integer latestBuild = Integer.valueOf(source.readLine());
+        if (!this.hasUpdates) {
             if (this.getDescription().getDescription() == null) {
                 this.msgToCS(
                         "&cНе удалось получить описание плагина // error. No description",
@@ -132,17 +118,27 @@ public class Main extends JavaPlugin implements Runnable {
                         );
                 return;
             }
-            Integer currentBuild = Integer.valueOf(this.getDescription().getDescription());
-            this.hasUpdates = !latestBuild.equals(currentBuild);
-            return;
-        } catch (IOException | NumberFormatException e) {
-            this.msgToCS(
-                    "&4Не удалось проверить обновление &e:( &7// &4Can't check update",
-                    "&eНапишите ошибку ниже сюда: &chttp://rubukkit.org/threads/119485"
-                    );
-            this.getLogger().log(Level.WARNING, "Ошибка: ", e);
+            try {
+                URL address = new URL("http://151.80.108.152/version.txt");
+                InputStreamReader pageInput = new InputStreamReader(address.openStream());
+                BufferedReader source = new BufferedReader(pageInput);
+                Integer latestBuild = Integer.valueOf(source.readLine());
+                Integer currentBuild = Integer.valueOf(this.getDescription().getDescription());
+                this.hasUpdates = !latestBuild.equals(currentBuild);
+            } catch (IOException | NumberFormatException e) {
+                this.msgToCS(
+                        "&4Не удалось проверить обновление &e:( &7// &4Can't check update",
+                        "&eНапишите ошибку ниже сюда: &chttp://rubukkit.org/threads/119485"
+                        );
+                this.getLogger().log(Level.WARNING, "Ошибка: ", e);
+            }
         }
-
+        if (this.hasUpdates) {
+            this.msgToCS(
+                    "&cНайдено новое обновление! &7// &cNew update found",
+                    "&chttp://rubukkit.org/threads/119485/"
+                    );
+        }
         return;
     }
     private void msgToCS(String... message) {

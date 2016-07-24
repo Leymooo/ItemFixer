@@ -6,8 +6,8 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 
-public class NBTArmListener extends PacketAdapter {
-    public NBTArmListener(Main plugin) {
+public class NBTHeldItemListener extends PacketAdapter {
+    public NBTHeldItemListener(Main plugin) {
         super(plugin, PacketType.Play.Client.HELD_ITEM_SLOT);
     }
 

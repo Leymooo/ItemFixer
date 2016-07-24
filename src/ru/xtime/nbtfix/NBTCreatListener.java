@@ -4,6 +4,7 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 
+import org.bukkit.GameMode;
 import org.bukkit.inventory.ItemStack;
 
 public class NBTCreatListener extends PacketAdapter {
@@ -14,6 +15,7 @@ public class NBTCreatListener extends PacketAdapter {
     @Override
     public void onPacketReceiving(PacketEvent event) {
         if (event.getPlayer().hasPermission("itemfixer.bypass")) return;
+        if (event.getPlayer().getGameMode() != GameMode.CREATIVE) return;
         ItemStack stack = event.getPacket().getItemModifier().read(0);
         if (((Main) getPlugin()).isExploit(stack, event.getPlayer())){
             event.getPlayer().sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
