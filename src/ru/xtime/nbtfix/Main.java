@@ -52,8 +52,6 @@ public class Main extends JavaPlugin implements Runnable {
                 final ItemMeta meta = item.getItemMeta();
                 meta.removeEnchant(Enchant);
                 item.setItemMeta(meta);
-                return;
-
             }
         }
         return;
