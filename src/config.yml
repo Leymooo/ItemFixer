@@ -1,3 +1,8 @@
+#Фикс краша сервера с помощью голов без скина.
+fix-skull-exploit: true
+#убирать с предмета зачарования которые предмет не может иметь. 
+#Например с земли будут убираться все зачарования, т.к у неё не может быть зачарований.
+remove-invalid-enchants: false
 #список нбт тегов для проверки.
 nbt:
   #ЧУВСТВИТЕЛЬНЫЙ К РЕГИСТРУ.
@@ -16,7 +21,7 @@ spawneggs:
   - ExplosionPower
 armorstand:
   - EntityTag
-writenbook:
+writtenbook:
   - ClickEvent
   - run_command
 inventory:
