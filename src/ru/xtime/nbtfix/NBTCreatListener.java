@@ -19,7 +19,7 @@ public class NBTCreatListener extends PacketAdapter {
         if (event.getPlayer().getGameMode() != GameMode.CREATIVE) return;
         if (event.getPlayer().hasPermission("itemfixer.bypass")) return;
         ItemStack stack = event.getPacket().getItemModifier().read(0);
-        if (((Main) getPlugin()).isExploit(stack, event.getPlayer())){
+        if (((Main) getPlugin()).isExploit(stack)){
             event.getPlayer().sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
         }
     }

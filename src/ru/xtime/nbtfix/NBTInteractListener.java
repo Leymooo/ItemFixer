@@ -20,6 +20,10 @@ public class NBTInteractListener implements Listener {
             event.getPlayer().getInventory().remove(event.getItem());
             event.setCancelled(true);
         }
+        if (plugin.isExploit(event.getItem())) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
+        }
     }
         
         

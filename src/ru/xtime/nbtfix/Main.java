@@ -12,7 +12,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -138,7 +137,7 @@ public class Main extends JavaPlugin implements Runnable {
 
         return false;
     }
-    public boolean isExploit(ItemStack stack, Player p) {
+    public boolean isExploit(ItemStack stack) {
         boolean b = false;
         try {
             removeEnt(stack);
@@ -168,7 +167,7 @@ public class Main extends JavaPlugin implements Runnable {
             } else if (mat == Material.WRITTEN_BOOK) {
                 for (String a : book) {
                     if (tag.toString().contains(a)) {
-                        p.getInventory().remove(stack);
+                        tag.getKeys().clear();
                         b = true;  
                     }
                 }
