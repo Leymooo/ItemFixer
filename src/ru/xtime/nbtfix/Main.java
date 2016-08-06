@@ -93,7 +93,7 @@ public class Main extends JavaPlugin implements Runnable {
         skullfix = this.getConfig().getBoolean("fix-skull-exploit");
         nbt.addAll(this.getConfig().getStringList("nbt"));
         eggs.addAll(this.getConfig().getStringList("spawneggs"));
-        eggs.add("Size");
+        if (!eggs.contains("Size")) eggs.add("Size");
         armor.addAll(this.getConfig().getStringList("armorstand"));
         book.addAll(this.getConfig().getStringList("writtenbook"));
         inventory.addAll(this.getConfig().getStringList("inventory"));
