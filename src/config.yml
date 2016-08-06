@@ -19,11 +19,12 @@ spawneggs:
   - powered
   - ActiveEffects
   - ExplosionPower
+  - Size
 armorstand:
   - EntityTag
 writtenbook:
   - ClickEvent
   - run_command
 inventory:
-#Chest, Dropper, TrappedChest, Dispenser
+#Chest, Dropper, TrappedChest, Dispenser, HOPPER
   - BlockEntityTag

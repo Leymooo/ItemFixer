@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -23,10 +24,11 @@ import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import com.comphenix.protocol.wrappers.nbt.NbtList;
 
 public class Main extends JavaPlugin implements Runnable {
-    Boolean hasUpdates;
-    Boolean mc17;
-    Boolean skullfix;
-    Boolean removeInvalidEnch;
+    private Boolean hasUpdates;
+    private Boolean mc17;
+    Boolean mc19;
+    private Boolean skullfix;
+    private Boolean removeInvalidEnch;
     private ArrayList<String> nbt = new ArrayList<String>();
     private ArrayList<String> eggs = new ArrayList<String>();
     private ArrayList<String> armor = new ArrayList<String>();
@@ -35,9 +37,11 @@ public class Main extends JavaPlugin implements Runnable {
     public void onEnable() {
         hasUpdates = false;
         mc17 = this.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3].startsWith("v1_7_R");
+        mc19 = (this.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3].startsWith("v1_9_R") || this.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3].startsWith("v1_10_R"));
         config();
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTHeldItemListener(this));
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
+        Bukkit.getPluginManager().registerEvents(new NBTInteractListener(this), this);
         this.getServer().getScheduler().runTaskTimerAsynchronously(this, this, 0, 18000L);
         this.msgToCS("&aItemFixer включен");
     }
@@ -63,6 +67,7 @@ public class Main extends JavaPlugin implements Runnable {
             list.add("powered");
             list.add("ActiveEffects");
             list.add("ExplosionPower");
+            list.add("Size");
             getConfig().set("spawneggs", list);
         }
         if (!getConfig().isSet("armorstand")) {
@@ -88,6 +93,7 @@ public class Main extends JavaPlugin implements Runnable {
         skullfix = this.getConfig().getBoolean("fix-skull-exploit");
         nbt.addAll(this.getConfig().getStringList("nbt"));
         eggs.addAll(this.getConfig().getStringList("spawneggs"));
+        eggs.add("Size");
         armor.addAll(this.getConfig().getStringList("armorstand"));
         book.addAll(this.getConfig().getStringList("writtenbook"));
         inventory.addAll(this.getConfig().getStringList("inventory"));
@@ -129,6 +135,7 @@ public class Main extends JavaPlugin implements Runnable {
                 }
             }
         }
+
         return false;
     }
     public boolean isExploit(ItemStack stack, Player p) {
@@ -151,7 +158,7 @@ public class Main extends JavaPlugin implements Runnable {
                     b = true;
                 }
             }
-            if (mat == Material.CHEST || mat == Material.TRAPPED_CHEST || mat == Material.DROPPER || mat == Material.DISPENSER || mat == Material.COMMAND || mat == Material.COMMAND_MINECART) {
+            if (mat == Material.CHEST || mat == Material.TRAPPED_CHEST || mat == Material.DROPPER || mat == Material.DISPENSER || mat == Material.COMMAND || mat == Material.COMMAND_MINECART || mat == Material.HOPPER || mat == Material.HOPPER_MINECART) {
                 for (String a : inventory) {
                     if (tag.containsKey(a)) {
                         tag.remove(a);
