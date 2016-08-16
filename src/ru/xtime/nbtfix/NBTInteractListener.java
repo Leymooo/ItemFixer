@@ -27,7 +27,7 @@ public class NBTInteractListener implements Listener {
         }
     }
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
-    public void onInteract(PlayerDropItemEvent event) {
+    public void onDrop(PlayerDropItemEvent event) {
         if (event.getPlayer().hasPermission("itemfixer.bypass")) return;
         if (event.getItemDrop() == null) return;
         if (plugin.mc19 && event.getItemDrop().getItemStack().getType() == Material.STRUCTURE_BLOCK) {

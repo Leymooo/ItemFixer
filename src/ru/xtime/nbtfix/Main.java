@@ -28,6 +28,7 @@ public class Main extends JavaPlugin implements Runnable {
     Boolean mc19;
     private Boolean skullfix;
     private Boolean removeInvalidEnch;
+    String ignoretag;
     private ArrayList<String> nbt = new ArrayList<String>();
     private ArrayList<String> eggs = new ArrayList<String>();
     private ArrayList<String> armor = new ArrayList<String>();
@@ -37,15 +38,22 @@ public class Main extends JavaPlugin implements Runnable {
         hasUpdates = false;
         mc17 = this.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3].startsWith("v1_7_R");
         mc19 = (this.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3].startsWith("v1_9_R") || this.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3].startsWith("v1_10_R"));
+        saveDefaultConfig();
         config();
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTHeldItemListener(this));
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
         Bukkit.getPluginManager().registerEvents(new NBTInteractListener(this), this);
         this.getServer().getScheduler().runTaskTimerAsynchronously(this, this, 0, 18000L);
+        this.getCommand("itemfixer").setExecutor(new IgnoreCmd(this));
         this.msgToCS("&aItemFixer включен");
     }
-    private void config() {
-        saveDefaultConfig();
+    public void config() {
+        reloadConfig();
+        nbt.clear();
+        eggs.clear();
+        armor.clear();
+        book.clear();
+        inventory.clear();
         if (!getConfig().isSet("remove-invalid-enchants")) getConfig().set("remove-invalid-enchants", false);
         if (!getConfig().isSet("fix-skull-exploit")) getConfig().set("fix-skull-exploit", true);
         if (!getConfig().isSet("nbt")) {
@@ -85,9 +93,13 @@ public class Main extends JavaPlugin implements Runnable {
             list.add("BlockEntityTag");
             getConfig().set("inventory", list);
         }
+        if (!getConfig().isSet("ignoreTag")) {
+            getConfig().set("ignoreTag", "unknown"+System.currentTimeMillis());
+        }
         saveConfig();
         saveDefaultConfig();
         reloadConfig();
+        ignoretag = getConfig().getString("ignoreTag");
         removeInvalidEnch = this.getConfig().getBoolean("remove-invalid-enchants");
         skullfix = this.getConfig().getBoolean("fix-skull-exploit");
         nbt.addAll(this.getConfig().getStringList("nbt"));
@@ -140,9 +152,12 @@ public class Main extends JavaPlugin implements Runnable {
     public boolean isExploit(ItemStack stack) {
         boolean b = false;
         try {
-            removeEnt(stack);
             Material mat = stack.getType();
             NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(stack);
+            if (tag.containsKey(ignoretag)) {
+                return false;
+            }
+            removeEnt(stack);
             // Фиксим CrashChest. CrashItem // Фиксим возможную утечку.
             if (mat == Material.CHEST || mat == Material.NAME_TAG) {
                 if (tag.toString().length() > 1000) {
@@ -157,7 +172,7 @@ public class Main extends JavaPlugin implements Runnable {
                     b = true;
                 }
             }
-            if (mat == Material.CHEST || mat == Material.TRAPPED_CHEST || mat == Material.DROPPER || mat == Material.DISPENSER || mat == Material.COMMAND || mat == Material.COMMAND_MINECART || mat == Material.HOPPER || mat == Material.HOPPER_MINECART) {
+            if (mat == Material.FURNACE || mat == Material.CHEST || mat == Material.TRAPPED_CHEST || mat == Material.DROPPER || mat == Material.DISPENSER || mat == Material.COMMAND || mat == Material.COMMAND_MINECART || mat == Material.HOPPER || mat == Material.HOPPER_MINECART) {
                 for (String a : inventory) {
                     if (tag.containsKey(a)) {
                         tag.remove(a);
@@ -165,15 +180,17 @@ public class Main extends JavaPlugin implements Runnable {
                     }
                 }
             } else if (mat == Material.WRITTEN_BOOK) {
+                final String c = tag.toString();
                 for (String a : book) {
-                    if (tag.toString().contains(a)) {
+                    if (c.contains(a)) {
                         tag.getKeys().clear();
                         b = true;  
                     }
                 }
             } else if (mat == Material.MONSTER_EGG || mat == Material.MONSTER_EGGS) {
+                final String c = tag.toString();
                 for (String a : eggs) {
-                    if (tag.toString().contains(a)) {
+                    if (c.contains(a)) {
                         tag.getKeys().clear();
                         b = true;
                     }
@@ -195,9 +212,6 @@ public class Main extends JavaPlugin implements Runnable {
     }
     @Override
     public void run() {
-        checkUpdate();
-    }
-    private void checkUpdate() {
         if (!this.hasUpdates) {
             if (this.getDescription().getDescription() == null) {
                 this.msgToCS(
@@ -229,6 +243,7 @@ public class Main extends JavaPlugin implements Runnable {
         }
         return;
     }
+
     private void msgToCS(String... message) {
         for (String line : message) {
             this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&b[ItemFixer] ".concat(line)));
