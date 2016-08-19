@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -27,6 +28,15 @@ public class NBTInteractListener implements Listener {
         }
     }
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    public void onInvClick(InventoryClickEvent event) {
+        if (event.getWhoClicked().hasPermission("itemfixer.bypass")) return;
+        if (event.getCurrentItem() == null) return;
+        if (plugin.isExploit(event.getCurrentItem())) {
+            event.setCancelled(true);
+            event.getWhoClicked().sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
+        }
+    }
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onDrop(PlayerDropItemEvent event) {
         if (event.getPlayer().hasPermission("itemfixer.bypass")) return;
         if (event.getItemDrop() == null) return;
@@ -38,6 +48,4 @@ public class NBTInteractListener implements Listener {
             event.getPlayer().sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
         }
     }
-        
-        
 }

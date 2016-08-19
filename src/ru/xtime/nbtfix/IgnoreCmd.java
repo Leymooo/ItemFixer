@@ -10,7 +10,7 @@ import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 
 public class IgnoreCmd implements CommandExecutor {
-    private Main plugin;
+    private final Main plugin;
     public IgnoreCmd(Main Main) {
         this.plugin = Main;
     }

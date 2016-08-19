@@ -29,6 +29,8 @@ public class Main extends JavaPlugin implements Runnable {
     private Boolean skullfix;
     private Boolean removeInvalidEnch;
     String ignoretag;
+    Boolean CheckInventory;
+    Boolean CheckArmor;
     private ArrayList<String> nbt = new ArrayList<String>();
     private ArrayList<String> eggs = new ArrayList<String>();
     private ArrayList<String> armor = new ArrayList<String>();
@@ -43,6 +45,11 @@ public class Main extends JavaPlugin implements Runnable {
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTHeldItemListener(this));
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
         Bukkit.getPluginManager().registerEvents(new NBTInteractListener(this), this);
+        if (getConfig().getBoolean("Timer.Enabled")) {
+            CheckInventory = getConfig().getBoolean("Timer.CheckInventory");
+            CheckArmor = getConfig().getBoolean("Timer.CheckArmor");
+            this.getServer().getScheduler().runTaskTimerAsynchronously(this, new Timer(this), 1L , (getConfig().getInt("Timer.delay")*20));
+        }
         this.getServer().getScheduler().runTaskTimerAsynchronously(this, this, 0, 18000L);
         this.getCommand("itemfixer").setExecutor(new IgnoreCmd(this));
         this.msgToCS("&aItemFixer включен");
@@ -76,6 +83,12 @@ public class Main extends JavaPlugin implements Runnable {
             list.add("ExplosionPower");
             list.add("Size");
             getConfig().set("spawneggs", list);
+        }
+        if (!getConfig().isSet("Timer")) {
+            getConfig().set("Timer.delay", 120);
+            getConfig().set("Timer.CheckInventory", false);
+            getConfig().set("Timer.CheckArmor", true);
+            getConfig().set("Timer.Enabled", true);
         }
         if (!getConfig().isSet("armorstand")) {
             ArrayList<String> list = new ArrayList<String>();
