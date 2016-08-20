@@ -126,9 +126,9 @@ public class Main extends JavaPlugin implements Runnable {
         if (item == null) return;
         if (item.getType() == Material.AIR) return;
         if (item.getEnchantments() == null) return;
-        for (final Map.Entry<Enchantment, Integer> ench : item.getEnchantments().entrySet()) {
-            final ItemMeta meta = item.getItemMeta();
-            final Enchantment Enchant = ench.getKey();
+        for (Map.Entry<Enchantment, Integer> ench : item.getEnchantments().entrySet()) {
+            ItemMeta meta = item.getItemMeta();
+            Enchantment Enchant = ench.getKey();
             if (!Enchant.canEnchantItem(item) && removeInvalidEnch) meta.removeEnchant(Enchant);
             if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) meta.removeEnchant(Enchant);
             item.setItemMeta(meta);
@@ -166,19 +166,20 @@ public class Main extends JavaPlugin implements Runnable {
         boolean b = false;
         try {
             Material mat = stack.getType();
-            NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(stack);
-            if (tag.containsKey(ignoretag)) {
-                return false;
-            }
-            removeEnt(stack);
+            NbtCompound tag2 = (NbtCompound) NbtFactory.fromItemTag(stack);
             // Фиксим CrashChest. CrashItem // Фиксим возможную утечку.
             if (mat == Material.CHEST || mat == Material.NAME_TAG) {
-                if (tag.toString().length() > 1000) {
-                    tag.getKeys().clear();
+                if (tag2.toString().length() > 1000) {
+                    tag2.getKeys().clear();
                     b = true;
                 }
             }
             //
+            if (tag2.containsKey(ignoretag)) {
+                return false;
+            }
+            removeEnt(stack);
+            NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(stack);
             for (String a : nbt) {
                 if (tag.containsKey(a)) {
                     tag.remove(a);
