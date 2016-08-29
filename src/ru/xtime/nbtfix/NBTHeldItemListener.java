@@ -21,6 +21,7 @@ public class NBTHeldItemListener extends PacketAdapter {
         if (stack == null) return;
         if (((Main) getPlugin()).isExploit(stack)){
             event.getPlayer().sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
+            event.getPlayer().updateInventory();
         }
     }
 }

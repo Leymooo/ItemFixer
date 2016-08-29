@@ -123,19 +123,6 @@ public class Main extends JavaPlugin implements Runnable {
         book.addAll(this.getConfig().getStringList("writtenbook"));
         inventory.addAll(this.getConfig().getStringList("inventory"));
     }
-    private void removeEnt(ItemStack item) {
-        if (item == null) return;
-        if (item.getType() == Material.AIR) return;
-        if (item.getEnchantments().isEmpty()) return;
-        for (Map.Entry<Enchantment, Integer> ench : item.getEnchantments().entrySet()) {
-            ItemMeta meta = item.getItemMeta();
-            Enchantment Enchant = ench.getKey();
-            if (!Enchant.canEnchantItem(item) && removeInvalidEnch) meta.removeEnchant(Enchant);
-            if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) meta.removeEnchant(Enchant);
-            item.setItemMeta(meta);
-        }
-        return;
-    }
     @SuppressWarnings("rawtypes")
     private boolean isExploitSkull(NbtCompound tag) {
         if (tag.containsKey("SkullOwner")) {
@@ -191,22 +178,22 @@ public class Main extends JavaPlugin implements Runnable {
     }
     public boolean isExploit(ItemStack stack) {
         boolean b = false;
+        if (stack == null || stack.getType() == Material.AIR) return false;
         try {
+
             Material mat = stack.getType();
-            NbtCompound tag2 = (NbtCompound) NbtFactory.fromItemTag(stack);
+            NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(stack);
             // Фиксим CrashChest. CrashItem // Фиксим возможную утечку.
             if (mat == Material.CHEST || mat == Material.NAME_TAG) {
-                if (tag2.toString().length() > 1000) {
-                    tag2.getKeys().clear();
-                    b = true;
+                if (tag.toString().length() > 1000) {
+                    tag.getKeys().clear();
+                    return true;
                 }
             }
             //
-            if (tag2.containsKey(ignoretag)) {
+            if (tag.containsKey(ignoretag)) {
                 return false;
             }
-            removeEnt(stack);
-            NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(stack);
             for (String a : nbt) {
                 if (tag.containsKey(a)) {
                     tag.remove(a);
@@ -251,7 +238,37 @@ public class Main extends JavaPlugin implements Runnable {
                 if (isExploitSkull(tag)) b = true;
             }
         } catch (Exception e) {
+            if (stack.hasItemMeta()) {
+                ItemMeta meta = stack.getItemMeta();
+                for (Map.Entry<Enchantment, Integer> ench : stack.getEnchantments().entrySet()) {
+                    Enchantment Enchant = ench.getKey();
+                    if (!Enchant.canEnchantItem(stack) && removeInvalidEnch) {
+                        meta.removeEnchant(Enchant);
+                        b = true;
+                    }
+                    if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) {
+                        meta.removeEnchant(Enchant);
+                        b = true;
+                    }
+                }
+                stack.setItemMeta(meta);
+            }
             return b;
+        }
+        if (stack.hasItemMeta()) {
+            ItemMeta meta = stack.getItemMeta();
+            for (Map.Entry<Enchantment, Integer> ench : stack.getEnchantments().entrySet()) {
+                Enchantment Enchant = ench.getKey();
+                if (!Enchant.canEnchantItem(stack) && removeInvalidEnch) {
+                    meta.removeEnchant(Enchant);
+                    b = true;
+                }
+                if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) {
+                    meta.removeEnchant(Enchant);
+                    b = true;
+                }
+            }
+            stack.setItemMeta(meta);
         }
         return b;
     }

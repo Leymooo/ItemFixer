@@ -1,8 +1,10 @@
 package ru.xtime.nbtfix;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
 
 
 public class Timer implements Runnable {
@@ -18,12 +20,16 @@ public class Timer implements Runnable {
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (plugin.CheckInventory) {
                 for (ItemStack it : p.getInventory().getContents()) {
-                    plugin.isExploit(it);
+                    if (it != null && it.getType() != Material.AIR) { 
+                        plugin.isExploit(it);
+                    }
                 }
             }
             if (plugin.CheckArmor) {
                 for (ItemStack it : p.getInventory().getArmorContents()) {
-                    plugin.isExploit(it);
+                    if (it != null && it.getType() != Material.AIR) { 
+                        plugin.isExploit(it);
+                    }
                 }
             }
         }

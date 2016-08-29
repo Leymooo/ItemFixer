@@ -97,6 +97,7 @@ public class IgnoreCmd implements CommandExecutor {
             } else {
                 is = p.getItemInHand();
             }
+            if (is == null) return false;
             NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(is);
             if (a) {
                 if (!tag.containsKey(plugin.ignoretag)) {
