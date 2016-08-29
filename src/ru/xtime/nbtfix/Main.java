@@ -15,18 +15,20 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.wrappers.nbt.NbtBase;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import com.comphenix.protocol.wrappers.nbt.NbtList;
+import com.google.common.io.BaseEncoding;
 
 public class Main extends JavaPlugin implements Runnable {
     private Boolean hasUpdates;
     private Boolean mc17;
     Boolean mc19;
-    private Boolean skullfix;
     private Boolean removeInvalidEnch;
     String ignoretag;
     Boolean CheckInventory;
@@ -114,7 +116,6 @@ public class Main extends JavaPlugin implements Runnable {
         reloadConfig();
         ignoretag = getConfig().getString("ignoreTag");
         removeInvalidEnch = this.getConfig().getBoolean("remove-invalid-enchants");
-        skullfix = this.getConfig().getBoolean("fix-skull-exploit");
         nbt.addAll(this.getConfig().getStringList("nbt"));
         eggs.addAll(this.getConfig().getStringList("spawneggs"));
         if (!eggs.contains("Size")) eggs.add("Size");
@@ -125,7 +126,7 @@ public class Main extends JavaPlugin implements Runnable {
     private void removeEnt(ItemStack item) {
         if (item == null) return;
         if (item.getType() == Material.AIR) return;
-        if (item.getEnchantments() == null) return;
+        if (item.getEnchantments().isEmpty()) return;
         for (Map.Entry<Enchantment, Integer> ench : item.getEnchantments().entrySet()) {
             ItemMeta meta = item.getItemMeta();
             Enchantment Enchant = ench.getKey();
@@ -148,11 +149,37 @@ public class Main extends JavaPlugin implements Runnable {
                             if (!((NbtCompound) texture).containsKey("Signature")) {
                                 if (((NbtCompound) texture).containsKey("Value")) {
                                     if (((NbtCompound) texture).getString("Value").trim().length() > 0) {
-                                        return false;
+                                        try {
+                                            String decoded = new String(BaseEncoding.base64().decode(((NbtCompound) texture).getString("Value")));
+                                            JSONObject object = (JSONObject) new JSONParser().parse(decoded);
+                                            if (object.containsKey("textures")) {
+                                                object = (JSONObject) object.get("textures");
+                                            }
+                                            if (object.containsKey("SKIN")) {
+                                                object = (JSONObject) object.get("SKIN");
+                                            }
+                                            if (!object.containsKey("url")) {
+                                                tag.remove("SkullOwner");
+                                                return true;
+                                            }
+                                            if (((String) object.get("url")).trim().length() == 0) {
+                                                tag.remove("SkullOwner");
+                                                return true;
+                                            }
+                                            return false;
+                                        } catch (Exception e) {
+                                            tag.remove("SkullOwner");
+                                            return true;
+                                        }
                                     }
                                 }
                                 tag.remove("SkullOwner");
                                 return true;
+                            } else {
+                                if (((NbtCompound) texture).getString("Signature").trim().length() == 0) {
+                                    tag.remove("SkullOwner");
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -186,7 +213,11 @@ public class Main extends JavaPlugin implements Runnable {
                     b = true;
                 }
             }
-            if (mat == Material.FURNACE || mat == Material.CHEST || mat == Material.TRAPPED_CHEST || mat == Material.DROPPER || mat == Material.DISPENSER || mat == Material.COMMAND || mat == Material.COMMAND_MINECART || mat == Material.HOPPER || mat == Material.HOPPER_MINECART) {
+            if (
+                    mat == Material.FURNACE || mat == Material.CHEST || mat == Material.TRAPPED_CHEST || 
+                    mat == Material.DROPPER || mat == Material.DISPENSER || mat == Material.COMMAND ||
+                    mat == Material.COMMAND_MINECART || mat == Material.HOPPER || mat == Material.HOPPER_MINECART
+                    ) {
                 for (String a : inventory) {
                     if (tag.containsKey(a)) {
                         tag.remove(a);
@@ -216,7 +247,7 @@ public class Main extends JavaPlugin implements Runnable {
                         b = true;
                     }
                 }
-            } else if ((mat == Material.SKULL || mat == Material.SKULL_ITEM) && skullfix && stack.getDurability() == 3) {
+            } else if ((mat == Material.SKULL || mat == Material.SKULL_ITEM) && stack.getDurability() == 3) {
                 if (isExploitSkull(tag)) b = true;
             }
         } catch (Exception e) {

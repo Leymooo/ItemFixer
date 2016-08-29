@@ -13,6 +13,9 @@ public class NBTHeldItemListener extends PacketAdapter {
 
     @Override
     public void onPacketReceiving(PacketEvent event) {
+        if (event.isCancelled()) return;
+        if (event.getPlayer() == null) return;
+        if (!event.getPlayer().isOnline()) return;
         if (event.getPlayer().hasPermission("itemfixer.bypass")) return;
         ItemStack stack = event.getPlayer().getInventory().getItem(event.getPacket().getIntegers().readSafely(0).shortValue());
         if (stack == null) return;

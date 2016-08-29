@@ -26,34 +26,43 @@ public class IgnoreCmd implements CommandExecutor {
             return false;
         }
         if (args.length == 0) {
-            sender.sendMessage("§a/itemfixer §c[add] §7- §aИгнорировать предмет от проверок");
-            sender.sendMessage("§a/itemfixer §c[remove] §7- §aСнова проверять предмет");
-            sender.sendMessage("§a/itemfixer §c[settag] [tag] §7- &aУстановить новый таг для игнорирования предметов");
+            msgToPl(p,
+                    "§a/itemfixer §c[add] §7- §aИгнорировать предмет от проверок",
+                    "§a/itemfixer §c[remove] §7- §aСнова проверять предмет",
+                    "§a/itemfixer §c[settag] [tag] §7- &aУстановить новый таг для игнорирования предметов");
             return false;
         }
         if (args[0].equalsIgnoreCase("add")) {
             if (setTag(p, true)) {
-                p.sendMessage("§a[ItemFixer] §eТеперь этот предмет будет игнорироваться от проверок!");
-                p.sendMessage("§a[ItemFixer] §cВнимание! Используйте на свой страх и риск!");
-                p.sendMessage("§a[ItemFixer] §cДанный предмет могут раздюпать креативщики");
-                p.sendMessage("              §cА также читеры могут спокойно изменять этот предмет!");
-                p.sendMessage("§a[ItemFixer] §6Если это произошло, то просто поменяйте таг в конфиге или через команду.");
+                msgToPl(p,
+                        "§a[ItemFixer] §eТеперь этот предмет будет игнорироваться от проверок!",
+                        "§a[ItemFixer] §cВнимание! Используйте на свой страх и риск!",
+                        "§a[ItemFixer] §cДанный предмет могут раздюпать креативщики",
+                        "              §cА также читеры могут спокойно изменять этот предмет!",
+                        "§a[ItemFixer] §6Если это произошло, то просто поменяйте таг в конфиге или через команду."
+                        );
+
             } else {
-                p.sendMessage("§a[ItemFixer] §cНе получилось игнорировать предмет!");
-                p.sendMessage("              §cСкорее всего предмет уже игнорируется");
+                msgToPl(p,
+                        "§a[ItemFixer] §cНе получилось игнорировать предмет!",
+                        "              §cСкорее всего предмет уже игнорируется"
+                        );
             }
         }
         if (args[0].equalsIgnoreCase("remove")) {
             if (setTag(p, false)) {
-                p.sendMessage("§a[ItemFixer] §eТеперь этот предмет снова проверяется!");
-                p.sendMessage("§a[ItemFixer] §cДанный предмет уже мог быть раздюпан");
-                p.sendMessage("§a[ItemFixer] §6Если вы уверены что предмет небыл раздюпан, то.");
-                p.sendMessage("§6              оставьте всё как есть.");
-                p.sendMessage("§6              Если нет, то просто поменяйте таг в конфиге или через команду.");
+                msgToPl(p,
+                        "§a[ItemFixer] §eТеперь этот предмет снова проверяется!",
+                        "§a[ItemFixer] §cДанный предмет уже мог быть раздюпан" , 
+                        "§a[ItemFixer] §6Если вы уверены что предмет небыл раздюпан, то",
+                        "§6              оставьте всё как есть. Если нет,",
+                        "§6              то просто поменяйте таг в конфиге или через команду."
+                        );
             } else {
-                p.sendMessage("§a[ItemFixer] §cНе получилось убрать игнорирование предмета!");
-                p.sendMessage("              §cСкорее всего предмет уже не игнорируется");
-
+                msgToPl(p,
+                        "§a[ItemFixer] §cНе получилось убрать игнорирование предмета!",
+                        "              §cСкорее всего предмет уже не игнорируется"
+                        );
             }
         }
         if (args[0].equalsIgnoreCase("reload")) {
@@ -68,7 +77,12 @@ public class IgnoreCmd implements CommandExecutor {
         }
         return false;
     }
-    
+
+    private void msgToPl(Player p, String... a) {
+        for (String line : a) {
+            p.sendMessage(line);
+        }
+    }
     @SuppressWarnings("deprecation")
     private boolean setTag(Player p, Boolean a) {
         try {
@@ -86,7 +100,7 @@ public class IgnoreCmd implements CommandExecutor {
             NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(is);
             if (a) {
                 if (!tag.containsKey(plugin.ignoretag)) {
-                    tag.put(plugin.ignoretag, "Po4emu bi suda 4tonibud ne dobavit?");
+                    tag.put(plugin.ignoretag, "random msg");
                     return true;
                 }
             } else {

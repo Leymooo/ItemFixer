@@ -48,4 +48,5 @@ public class NBTInteractListener implements Listener {
             event.getPlayer().sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
         }
     }
+
 }
