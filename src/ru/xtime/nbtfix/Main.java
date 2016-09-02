@@ -124,56 +124,70 @@ public class Main extends JavaPlugin implements Runnable {
         inventory.addAll(this.getConfig().getStringList("inventory"));
     }
     @SuppressWarnings("rawtypes")
-    private boolean isExploitSkull(NbtCompound tag) {
-        if (tag.containsKey("SkullOwner")) {
-            NbtCompound skullOwner = tag.getCompound("SkullOwner");
+    private boolean isExploitSkull(NbtCompound root) {
+        if (root.containsKey("SkullOwner")) {
+            NbtCompound skullOwner = root.getCompound("SkullOwner");
+            System.out.print("skullOwner: "+ skullOwner);
             if (skullOwner.containsKey("Properties")) {
                 NbtCompound properties = skullOwner.getCompound("Properties");
+                System.out.print("properties: "+ properties);
                 if (properties.containsKey("textures")) {
                     NbtList<NbtBase> textures = properties.getList("textures");
+                    System.out.print("textures: "+ textures);
                     for (NbtBase texture : textures.asCollection()) {
                         if (texture instanceof NbtCompound) {
-                            if (!((NbtCompound) texture).containsKey("Signature")) {
-                                if (((NbtCompound) texture).containsKey("Value")) {
-                                    if (((NbtCompound) texture).getString("Value").trim().length() > 0) {
-                                        try {
-                                            String decoded = new String(BaseEncoding.base64().decode(((NbtCompound) texture).getString("Value")));
-                                            JSONObject object = (JSONObject) new JSONParser().parse(decoded);
-                                            if (object.containsKey("textures")) {
-                                                object = (JSONObject) object.get("textures");
-                                            }
-                                            if (object.containsKey("SKIN")) {
-                                                object = (JSONObject) object.get("SKIN");
-                                            }
-                                            if (!object.containsKey("url")) {
-                                                tag.remove("SkullOwner");
-                                                return true;
-                                            }
-                                            if (((String) object.get("url")).trim().length() == 0) {
-                                                tag.remove("SkullOwner");
-                                                return true;
-                                            }
-                                            return false;
-                                        } catch (Exception e) {
-                                            tag.remove("SkullOwner");
+                            System.out.print("texture: "+ texture);
+                            // Check for value
+                            if (((NbtCompound) texture).containsKey("Value")) {
+                                if (((NbtCompound) texture).getString("Value").trim().length() > 0) {
+                                    // Check json
+                                    try {
+                                        String decoded = new String(BaseEncoding.base64().decode(((NbtCompound) texture).getString("Value")));
+                                        JSONObject object = (JSONObject) new JSONParser().parse(decoded);
+                                        System.out.print("object: "+ object);
+                                        System.out.print("object_toString: "+ object.toString());
+                                        if (object.containsKey("textures")) {
+                                            object = (JSONObject) object.get("textures");
+                                            System.out.print("object_textures: "+ object.toString());
+                                            System.out.print("object_textures_toString: "+ object);
+                                        }
+                                        if (object.containsKey("SKIN")) {
+                                            object = (JSONObject) object.get("SKIN");
+                                            System.out.print("object_SKIN: "+ object.toString());
+                                            System.out.print("object_SKIN_toString: "+ object);
+                                        }
+                                        if (!object.containsKey("url")) {
+                                            root.remove("SkullOwner");
+                                            System.out.print("DONT HAVE URL, SKULLOWNER REMOVED");
                                             return true;
                                         }
+                                        if (((String) object.get("url")).trim().length() == 0) {
+                                            root.remove("SkullOwner");
+                                            System.out.print("URL LENGTH == 0, SKULLOWNER REMOVED");
+                                            return true;
+                                        }
+                                        return false;
+                                    } catch (Exception e) {
+                                        // Decode failed
+                                        root.remove("SkullOwner");
+                                        System.out.print("Decode failed, SKULLOWNER REMOVED");
+                                        return true;
                                     }
-                                }
-                                tag.remove("SkullOwner");
-                                return true;
-                            } else {
-                                if (((NbtCompound) texture).getString("Signature").trim().length() == 0) {
-                                    tag.remove("SkullOwner");
+                                } else {
+                                    root.remove("SkullOwner");
+                                    System.out.print("VALUE LENGTH == 0, SKULLOWNER REMOVED");
                                     return true;
                                 }
+                            } else {
+                                root.remove("SkullOwner");
+                                System.out.print("Skull dont have VALUE, SKULLOWNER REMOVED");
+                                return true;
                             }
                         }
                     }
                 }
             }
         }
-
         return false;
     }
     public boolean isExploit(ItemStack stack) {
@@ -235,7 +249,11 @@ public class Main extends JavaPlugin implements Runnable {
                     }
                 }
             } else if ((mat == Material.SKULL || mat == Material.SKULL_ITEM) && stack.getDurability() == 3) {
+                System.out.print("----------------Debug Start ----------------");
+                System.out.print("fromItemTag: "+tag);
                 if (isExploitSkull(tag)) b = true;
+                System.out.print("----------------Debug Finish ---------------");
+
             }
         } catch (Exception e) {
             if (stack.hasItemMeta()) {
