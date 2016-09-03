@@ -30,6 +30,7 @@ public class Main extends JavaPlugin implements Runnable {
     private Boolean mc17;
     Boolean mc19;
     private Boolean removeInvalidEnch;
+    private Boolean skullExploitFix;
     String ignoretag;
     Boolean CheckInventory;
     Boolean CheckArmor;
@@ -44,6 +45,10 @@ public class Main extends JavaPlugin implements Runnable {
         mc19 = (this.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3].startsWith("v1_9_R") || this.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3].startsWith("v1_10_R"));
         saveDefaultConfig();
         config();
+        if (!skullExploitFix) {
+            msgToCS("&aНайден &eSkull Exploit Patch&a, использую его.&7/",
+                    "&aFound &eSkull Exploit Patch&a, use it.");
+        }
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTHeldItemListener(this));
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
         Bukkit.getPluginManager().registerEvents(new NBTInteractListener(this), this);
@@ -114,6 +119,7 @@ public class Main extends JavaPlugin implements Runnable {
         saveConfig();
         saveDefaultConfig();
         reloadConfig();
+        skullExploitFix = Bukkit.getPluginManager().getPlugin("SkullExploitPatch") == null;
         ignoretag = getConfig().getString("ignoreTag");
         removeInvalidEnch = this.getConfig().getBoolean("remove-invalid-enchants");
         nbt.addAll(this.getConfig().getStringList("nbt"));
@@ -131,16 +137,12 @@ public class Main extends JavaPlugin implements Runnable {
     private boolean isExploitSkull(NbtCompound root) {
         if (root.containsKey("SkullOwner")) {
             NbtCompound skullOwner = root.getCompound("SkullOwner");
-            System.out.print("skullOwner: "+ skullOwner);
             if (skullOwner.containsKey("Properties")) {
                 NbtCompound properties = skullOwner.getCompound("Properties");
-                System.out.print("properties: "+ properties);
                 if (properties.containsKey("textures")) {
                     NbtList<NbtBase> textures = properties.getList("textures");
-                    System.out.print("textures: "+ textures);
                     for (NbtBase texture : textures.asCollection()) {
                         if (texture instanceof NbtCompound) {
-                            System.out.print("texture: "+ texture);
                             // Check for value
                             if (((NbtCompound) texture).containsKey("Value")) {
                                 if (((NbtCompound) texture).getString("Value").trim().length() > 0) {
@@ -148,43 +150,32 @@ public class Main extends JavaPlugin implements Runnable {
                                     try {
                                         String decoded = new String(BaseEncoding.base64().decode(((NbtCompound) texture).getString("Value")));
                                         JSONObject object = (JSONObject) new JSONParser().parse(decoded);
-                                        System.out.print("object: "+ object);
-                                        System.out.print("object_toString: "+ object.toString());
                                         if (object.containsKey("textures")) {
                                             object = (JSONObject) object.get("textures");
-                                            System.out.print("object_textures: "+ object.toString());
-                                            System.out.print("object_textures_toString: "+ object);
                                         }
                                         if (object.containsKey("SKIN")) {
                                             object = (JSONObject) object.get("SKIN");
-                                            System.out.print("object_SKIN: "+ object.toString());
-                                            System.out.print("object_SKIN_toString: "+ object);
                                         }
                                         if (!object.containsKey("url")) {
                                             root.remove("SkullOwner");
-                                            System.out.print("DONT HAVE URL, SKULLOWNER REMOVED");
                                             return true;
                                         }
                                         if (((String) object.get("url")).trim().length() == 0) {
                                             root.remove("SkullOwner");
-                                            System.out.print("URL LENGTH == 0, SKULLOWNER REMOVED");
                                             return true;
                                         }
                                         return false;
                                     } catch (Exception e) {
                                         // Decode failed
                                         root.remove("SkullOwner");
-                                        System.out.print("Decode failed, SKULLOWNER REMOVED");
                                         return true;
                                     }
                                 } else {
                                     root.remove("SkullOwner");
-                                    System.out.print("VALUE LENGTH == 0, SKULLOWNER REMOVED");
                                     return true;
                                 }
                             } else {
                                 root.remove("SkullOwner");
-                                System.out.print("Skull dont have VALUE, SKULLOWNER REMOVED");
                                 return true;
                             }
                         }
@@ -253,12 +244,8 @@ public class Main extends JavaPlugin implements Runnable {
                         b = true;
                     }
                 }
-            } else if ((mat == Material.SKULL || mat == Material.SKULL_ITEM) && stack.getDurability() == 3) {
-                System.out.print("----------------Debug Start ----------------");
-                System.out.print("fromItemTag: "+tag);
+            } else if ((mat == Material.SKULL || mat == Material.SKULL_ITEM) && skullExploitFix && stack.getDurability() == 3) {
                 if (isExploitSkull(tag)) b = true;
-                System.out.print("----------------Debug Finish ---------------");
-
             }
         } catch (Exception e) {
             if (stack.hasItemMeta()) {

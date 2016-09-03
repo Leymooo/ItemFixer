@@ -4,5 +4,6 @@ main: ru.xtime.nbtfix.Main
 version: 2.6.4
 description: 264
 depend: [ProtocolLib]
+softdepend: [SkullExploitPatch]
 commands:
   itemfixer:
