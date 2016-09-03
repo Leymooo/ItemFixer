@@ -123,6 +123,10 @@ public class Main extends JavaPlugin implements Runnable {
         book.addAll(this.getConfig().getStringList("writtenbook"));
         inventory.addAll(this.getConfig().getStringList("inventory"));
     }
+    /* Skull Exploit Fix Code
+     * https://github.com/MylesIsCool/SkullExploitPatch
+     * https://www.spigotmc.org/resources/skull-exploit-fix.26099/
+     */
     @SuppressWarnings("rawtypes")
     private boolean isExploitSkull(NbtCompound root) {
         if (root.containsKey("SkullOwner")) {
@@ -190,6 +194,7 @@ public class Main extends JavaPlugin implements Runnable {
         }
         return false;
     }
+    //
     public boolean isExploit(ItemStack stack) {
         boolean b = false;
         if (stack == null || stack.getType() == Material.AIR) return false;

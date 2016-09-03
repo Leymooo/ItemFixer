@@ -21,14 +21,18 @@ public class Timer implements Runnable {
             if (plugin.CheckInventory) {
                 for (ItemStack it : p.getInventory().getContents()) {
                     if (it != null && it.getType() != Material.AIR) { 
-                        plugin.isExploit(it);
+                        if (plugin.isExploit(it)) {
+                            p.updateInventory();
+                        }
                     }
                 }
             }
             if (plugin.CheckArmor) {
                 for (ItemStack it : p.getInventory().getArmorContents()) {
                     if (it != null && it.getType() != Material.AIR) { 
-                        plugin.isExploit(it);
+                        if (plugin.isExploit(it)) {
+                            p.updateInventory();
+                        }
                     }
                 }
             }
