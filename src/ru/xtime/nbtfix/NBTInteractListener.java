@@ -1,5 +1,6 @@
 package ru.xtime.nbtfix;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -10,11 +11,14 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import com.gmail.filoghost.chestcommands.internal.MenuInventoryHolder;
+
 public class NBTInteractListener implements Listener {
     private final Main plugin;
-
+    private Boolean cc;
     public NBTInteractListener(Main Main) {
         this.plugin = Main;
+        this.cc = Bukkit.getPluginManager().getPlugin("ChestCommands") != null;
     }
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onInteract(PlayerInteractEvent event) {
@@ -32,6 +36,7 @@ public class NBTInteractListener implements Listener {
     }
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onInvClick(InventoryClickEvent event) {
+        if (cc && event.getInventory().getHolder() instanceof MenuInventoryHolder) return;
         if (event.getWhoClicked().getType() != EntityType.PLAYER) return;
         if (event.getWhoClicked().hasPermission("itemfixer.bypass")) return;
         if (event.getCurrentItem() == null) return;

@@ -30,7 +30,6 @@ public class Main extends JavaPlugin implements Runnable {
     private Boolean mc17;
     Boolean mc19;
     private Boolean removeInvalidEnch;
-    private Boolean skullExploitFix;
     String ignoretag;
     Boolean CheckInventory;
     Boolean CheckArmor;
@@ -45,10 +44,6 @@ public class Main extends JavaPlugin implements Runnable {
         mc19 = (this.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3].startsWith("v1_9_R") || this.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3].startsWith("v1_10_R"));
         saveDefaultConfig();
         config();
-        if (!skullExploitFix) {
-            msgToCS("&aНайден &eSkull Exploit Patch&a, использую его.&7/",
-                    "&aFound &eSkull Exploit Patch&a, use it.");
-        }
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTHeldItemListener(this));
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
         Bukkit.getPluginManager().registerEvents(new NBTInteractListener(this), this);
@@ -72,7 +67,6 @@ public class Main extends JavaPlugin implements Runnable {
         if (!getConfig().isSet("fix-skull-exploit")) getConfig().set("fix-skull-exploit", true);
         if (!getConfig().isSet("nbt")) {
             ArrayList<String> list = new ArrayList<String>();
-            list.add("Items");
             list.add("ActiveEffects");
             list.add("Command");
             list.add("CustomName");
@@ -119,7 +113,6 @@ public class Main extends JavaPlugin implements Runnable {
         saveConfig();
         saveDefaultConfig();
         reloadConfig();
-        skullExploitFix = Bukkit.getPluginManager().getPlugin("SkullExploitPatch") == null;
         ignoretag = getConfig().getString("ignoreTag");
         removeInvalidEnch = this.getConfig().getBoolean("remove-invalid-enchants");
         nbt.addAll(this.getConfig().getStringList("nbt"));
@@ -148,7 +141,7 @@ public class Main extends JavaPlugin implements Runnable {
                                 if (((NbtCompound) texture).getString("Value").trim().length() > 0) {
                                     // Check json
                                     try {
-                                        String decoded = new String(BaseEncoding.base64().decode(((NbtCompound) texture).getString("Value")));
+                                        String decoded = new String(BaseEncoding.base64().decode(((NbtCompound) texture).getString("Value").replace("\"", "")));
                                         JSONObject object = (JSONObject) new JSONParser().parse(decoded);
                                         if (object.containsKey("textures")) {
                                             object = (JSONObject) object.get("textures");
@@ -166,7 +159,6 @@ public class Main extends JavaPlugin implements Runnable {
                                         }
                                         return false;
                                     } catch (Exception e) {
-                                        // Decode failed
                                         root.remove("SkullOwner");
                                         return true;
                                     }
@@ -213,7 +205,8 @@ public class Main extends JavaPlugin implements Runnable {
             if (
                     mat == Material.FURNACE || mat == Material.CHEST || mat == Material.TRAPPED_CHEST || 
                     mat == Material.DROPPER || mat == Material.DISPENSER || mat == Material.COMMAND ||
-                    mat == Material.COMMAND_MINECART || mat == Material.HOPPER || mat == Material.HOPPER_MINECART
+                    mat == Material.COMMAND_MINECART || mat == Material.HOPPER || mat == Material.HOPPER_MINECART ||
+                    mat == Material.BREWING_STAND || mat == Material.BREWING_STAND_ITEM || mat == Material.BEACON 
                     ) {
                 for (String a : inventory) {
                     if (tag.containsKey(a)) {
@@ -244,7 +237,7 @@ public class Main extends JavaPlugin implements Runnable {
                         b = true;
                     }
                 }
-            } else if ((mat == Material.SKULL || mat == Material.SKULL_ITEM) && skullExploitFix && stack.getDurability() == 3) {
+            } else if ((mat == Material.SKULL || mat == Material.SKULL_ITEM) && stack.getDurability() == 3) {
                 if (isExploitSkull(tag)) b = true;
             }
         } catch (Exception e) {
