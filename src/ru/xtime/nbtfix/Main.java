@@ -33,6 +33,7 @@ public class Main extends JavaPlugin implements Runnable {
     String ignoretag;
     Boolean CheckInventory;
     Boolean CheckArmor;
+    private Boolean checkench;
     private ArrayList<String> nbt = new ArrayList<String>();
     private ArrayList<String> eggs = new ArrayList<String>();
     private ArrayList<String> armor = new ArrayList<String>();
@@ -64,7 +65,7 @@ public class Main extends JavaPlugin implements Runnable {
         book.clear();
         inventory.clear();
         if (!getConfig().isSet("remove-invalid-enchants")) getConfig().set("remove-invalid-enchants", false);
-        if (!getConfig().isSet("fix-skull-exploit")) getConfig().set("fix-skull-exploit", true);
+        if (!getConfig().isSet("check-enchants")) getConfig().set("check-enchants", true);
         if (!getConfig().isSet("nbt")) {
             ArrayList<String> list = new ArrayList<String>();
             list.add("ActiveEffects");
@@ -113,6 +114,7 @@ public class Main extends JavaPlugin implements Runnable {
         saveConfig();
         saveDefaultConfig();
         reloadConfig();
+        checkench = getConfig().getBoolean("check-enchants");
         ignoretag = getConfig().getString("ignoreTag");
         removeInvalidEnch = this.getConfig().getBoolean("remove-invalid-enchants");
         nbt.addAll(this.getConfig().getStringList("nbt"));
@@ -241,7 +243,7 @@ public class Main extends JavaPlugin implements Runnable {
                 if (isExploitSkull(tag)) b = true;
             }
         } catch (Exception e) {
-            if (stack.hasItemMeta()) {
+            if (checkench && stack.hasItemMeta()) {
                 ItemMeta meta = stack.getItemMeta();
                 for (Map.Entry<Enchantment, Integer> ench : stack.getEnchantments().entrySet()) {
                     Enchantment Enchant = ench.getKey();
@@ -258,7 +260,7 @@ public class Main extends JavaPlugin implements Runnable {
             }
             return b;
         }
-        if (stack.hasItemMeta()) {
+        if (checkench && stack.hasItemMeta()) {
             ItemMeta meta = stack.getItemMeta();
             for (Map.Entry<Enchantment, Integer> ench : stack.getEnchantments().entrySet()) {
                 Enchantment Enchant = ench.getKey();
