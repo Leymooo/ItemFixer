@@ -15,8 +15,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.wrappers.nbt.NbtBase;
@@ -142,28 +140,12 @@ public class Main extends JavaPlugin implements Runnable {
                             if (((NbtCompound) texture).containsKey("Value")) {
                                 if (((NbtCompound) texture).getString("Value").trim().length() > 0) {
                                     // Check json
-                                    try {
-                                        String decoded = new String(BaseEncoding.base64().decode(((NbtCompound) texture).getString("Value").replace("\"", "")));
-                                        JSONObject object = (JSONObject) new JSONParser().parse(decoded);
-                                        if (object.containsKey("textures")) {
-                                            object = (JSONObject) object.get("textures");
-                                        }
-                                        if (object.containsKey("SKIN")) {
-                                            object = (JSONObject) object.get("SKIN");
-                                        }
-                                        if (!object.containsKey("url")) {
-                                            root.remove("SkullOwner");
-                                            return true;
-                                        }
-                                        if (((String) object.get("url")).trim().length() == 0) {
+                                        String decoded = new String(BaseEncoding.base64().decode(((NbtCompound) texture).getString("Value")));
+                                        if (!decoded.contains("textures") && !decoded.toLowerCase().contains("skin")  && !decoded.contains("url")) {
                                             root.remove("SkullOwner");
                                             return true;
                                         }
                                         return false;
-                                    } catch (Exception e) {
-                                        root.remove("SkullOwner");
-                                        return true;
-                                    }
                                 } else {
                                     root.remove("SkullOwner");
                                     return true;
@@ -180,6 +162,19 @@ public class Main extends JavaPlugin implements Runnable {
         return false;
     }
     //
+    private ItemMeta getClearMeta(ItemStack stack) {
+       final ItemMeta meta = stack.getItemMeta();
+        for (Map.Entry<Enchantment, Integer> ench : stack.getEnchantments().entrySet()) {
+            Enchantment Enchant = ench.getKey();
+            if (!Enchant.canEnchantItem(stack) && removeInvalidEnch) {
+                meta.removeEnchant(Enchant);
+            }
+            if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) {
+                meta.removeEnchant(Enchant);
+            }
+        }
+        return meta;
+    }
     public boolean isExploit(ItemStack stack) {
         boolean b = false;
         if (stack == null || stack.getType() == Material.AIR) return false;
@@ -244,36 +239,12 @@ public class Main extends JavaPlugin implements Runnable {
             }
         } catch (Exception e) {
             if (checkench && stack.hasItemMeta()) {
-                ItemMeta meta = stack.getItemMeta();
-                for (Map.Entry<Enchantment, Integer> ench : stack.getEnchantments().entrySet()) {
-                    Enchantment Enchant = ench.getKey();
-                    if (!Enchant.canEnchantItem(stack) && removeInvalidEnch) {
-                        meta.removeEnchant(Enchant);
-                        b = true;
-                    }
-                    if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) {
-                        meta.removeEnchant(Enchant);
-                        b = true;
-                    }
-                }
-                stack.setItemMeta(meta);
+                stack.setItemMeta(getClearMeta(stack));
             }
             return b;
         }
         if (checkench && stack.hasItemMeta()) {
-            ItemMeta meta = stack.getItemMeta();
-            for (Map.Entry<Enchantment, Integer> ench : stack.getEnchantments().entrySet()) {
-                Enchantment Enchant = ench.getKey();
-                if (!Enchant.canEnchantItem(stack) && removeInvalidEnch) {
-                    meta.removeEnchant(Enchant);
-                    b = true;
-                }
-                if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) {
-                    meta.removeEnchant(Enchant);
-                    b = true;
-                }
-            }
-            stack.setItemMeta(meta);
+            stack.setItemMeta(getClearMeta(stack));
         }
         return b;
     }
