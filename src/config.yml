@@ -3,6 +3,11 @@
 remove-invalid-enchants: false
 #проверять зачарования
 check-enchants: true
+#Миры где отключены проверки
+ignore-worlds:
+  - "tipo tut mir: world, world_nether, i td"
+  #- "world"
+  #- "world2"
 #список нбт тегов для проверки.
 nbt:
   #ЧУВСТВИТЕЛЬНЫЙ К РЕГИСТРУ.

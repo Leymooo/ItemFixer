@@ -1,5 +1,6 @@
 package ru.xtime.nbtfix;
 
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.comphenix.protocol.PacketType;
@@ -14,14 +15,15 @@ public class NBTHeldItemListener extends PacketAdapter {
     @Override
     public void onPacketReceiving(PacketEvent event) {
         if (event.isCancelled()) return;
-        if (event.getPlayer() == null) return;
-        if (!event.getPlayer().isOnline()) return;
-        if (event.getPlayer().hasPermission("itemfixer.bypass")) return;
-        ItemStack stack = event.getPlayer().getInventory().getItem(event.getPacket().getIntegers().readSafely(0).shortValue());
+        final Player p = event.getPlayer();
+        if (p == null) return;
+        if (!p.isOnline()) return;
+        if (p.hasPermission("itemfixer.bypass")) return;
+        ItemStack stack = p.getInventory().getItem(event.getPacket().getIntegers().readSafely(0).shortValue());
         if (stack == null) return;
-        if (((Main) getPlugin()).isExploit(stack)){
-            event.getPlayer().sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
-            event.getPlayer().updateInventory();
+        if (((Main) getPlugin()).isExploit(stack, p.getWorld().getName().toLowerCase())){
+            p.sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
+            p.updateInventory();
         }
     }
 }

@@ -21,7 +21,7 @@ public class Timer implements Runnable {
             if (plugin.CheckInventory) {
                 for (ItemStack it : p.getInventory().getContents()) {
                     if (it != null && it.getType() != Material.AIR) { 
-                        if (plugin.isExploit(it)) {
+                        if (plugin.isExploit(it, p.getWorld().getName().toLowerCase())) {
                             p.updateInventory();
                         }
                     }
@@ -30,7 +30,7 @@ public class Timer implements Runnable {
             if (plugin.CheckArmor) {
                 for (ItemStack it : p.getInventory().getArmorContents()) {
                     if (it != null && it.getType() != Material.AIR) { 
-                        if (plugin.isExploit(it)) {
+                        if (plugin.isExploit(it, p.getWorld().getName().toLowerCase())) {
                             p.updateInventory();
                         }
                     }

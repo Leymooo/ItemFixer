@@ -32,6 +32,7 @@ public class Main extends JavaPlugin implements Runnable {
     Boolean CheckInventory;
     Boolean CheckArmor;
     private Boolean checkench;
+    private ArrayList<String> worlds = new ArrayList<String>();
     private ArrayList<String> nbt = new ArrayList<String>();
     private ArrayList<String> eggs = new ArrayList<String>();
     private ArrayList<String> armor = new ArrayList<String>();
@@ -74,6 +75,11 @@ public class Main extends JavaPlugin implements Runnable {
             list.add("CustomPotionEffects");
             getConfig().set("nbt", list);
         }
+        if (!getConfig().isSet("ignore-worlds")) {
+            ArrayList<String> list = new ArrayList<String>();
+            list.add("random_world228");
+            getConfig().set("ignore-worlds", list);
+        }
         if (!getConfig().isSet("spawneggs")) {
             ArrayList<String> list = new ArrayList<String>();
             list.add("Fuse");
@@ -112,6 +118,7 @@ public class Main extends JavaPlugin implements Runnable {
         saveConfig();
         saveDefaultConfig();
         reloadConfig();
+        worlds.addAll(getConfig().getStringList("ignore-worlds"));
         checkench = getConfig().getBoolean("check-enchants");
         ignoretag = getConfig().getString("ignoreTag");
         removeInvalidEnch = this.getConfig().getBoolean("remove-invalid-enchants");
@@ -175,7 +182,8 @@ public class Main extends JavaPlugin implements Runnable {
         }
         return meta;
     }
-    public boolean isExploit(ItemStack stack) {
+    public boolean isExploit(ItemStack stack, String world) {
+        if (worlds.contains(world)) return false;
         boolean b = false;
         if (stack == null || stack.getType() == Material.AIR) return false;
         try {
@@ -238,12 +246,12 @@ public class Main extends JavaPlugin implements Runnable {
                 if (isExploitSkull(tag)) b = true;
             }
         } catch (Exception e) {
-            if (checkench && stack.hasItemMeta()) {
+            if (checkench && stack.hasItemMeta() && !stack.getItemMeta().getEnchants().isEmpty()) {
                 stack.setItemMeta(getClearMeta(stack));
             }
             return b;
         }
-        if (checkench && stack.hasItemMeta()) {
+        if (checkench && stack.hasItemMeta() && !stack.getItemMeta().getEnchants().isEmpty()) {
             stack.setItemMeta(getClearMeta(stack));
         }
         return b;
