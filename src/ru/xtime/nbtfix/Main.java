@@ -46,7 +46,7 @@ public class Main extends JavaPlugin implements Runnable {
         config();
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTHeldItemListener(this));
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
-        Bukkit.getPluginManager().registerEvents(new NBTInteractListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new NBTListener(this), this);
         if (getConfig().getBoolean("Timer.Enabled")) {
             CheckInventory = getConfig().getBoolean("Timer.CheckInventory");
             CheckArmor = getConfig().getBoolean("Timer.CheckArmor");
@@ -183,7 +183,7 @@ public class Main extends JavaPlugin implements Runnable {
         return meta;
     }
     public boolean isExploit(ItemStack stack, String world) {
-        if (worlds.contains(world)) return false;
+       // if (worlds.contains(world)) return false;
         boolean b = false;
         if (stack == null || stack.getType() == Material.AIR) return false;
         try {
@@ -246,12 +246,12 @@ public class Main extends JavaPlugin implements Runnable {
                 if (isExploitSkull(tag)) b = true;
             }
         } catch (Exception e) {
-            if (checkench && stack.hasItemMeta() && !stack.getItemMeta().getEnchants().isEmpty()) {
+            if (checkench && stack.hasItemMeta() && stack.getItemMeta().hasEnchants()) {
                 stack.setItemMeta(getClearMeta(stack));
             }
             return b;
         }
-        if (checkench && stack.hasItemMeta() && !stack.getItemMeta().getEnchants().isEmpty()) {
+        if (checkench && stack.hasItemMeta() && stack.getItemMeta().hasEnchants()) {
             stack.setItemMeta(getClearMeta(stack));
         }
         return b;
@@ -272,6 +272,10 @@ public class Main extends JavaPlugin implements Runnable {
                 BufferedReader source = new BufferedReader(pageInput);
                 Integer latestBuild = Integer.valueOf(source.readLine());
                 Integer currentBuild = Integer.valueOf(this.getDescription().getDescription());
+                if (currentBuild == 266) {
+                    this.hasUpdates = false;
+                    return;
+                }
                 this.hasUpdates = !latestBuild.equals(currentBuild);
             } catch (IOException | NumberFormatException e) {
                 this.msgToCS(

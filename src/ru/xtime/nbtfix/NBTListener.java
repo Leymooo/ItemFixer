@@ -10,13 +10,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 
 import com.gmail.filoghost.chestcommands.internal.MenuInventoryHolder;
 
-public class NBTInteractListener implements Listener {
+public class NBTListener implements Listener {
     private final Main plugin;
     private Boolean cc;
-    public NBTInteractListener(Main Main) {
+    public NBTListener(Main Main) {
         this.plugin = Main;
         this.cc = Bukkit.getPluginManager().getPlugin("ChestCommands") != null;
     }
@@ -57,6 +58,20 @@ public class NBTInteractListener implements Listener {
             event.getItemDrop().remove();
         }
         if (plugin.isExploit(event.getItemDrop().getItemStack(), p.getWorld().getName().toLowerCase())) {
+            event.setCancelled(true);
+            p.updateInventory();
+            p.sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
+        }
+    }
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    public void onPickup(PlayerPickupItemEvent event) {
+        final Player p = event.getPlayer();
+        if (p.hasPermission("itemfixer.bypass")) return;
+        if (event.getItem() == null) return;
+        if (plugin.mc19 && event.getItem().getItemStack().getType() == Material.STRUCTURE_BLOCK) {
+            event.getItem().remove();
+        }
+        if (plugin.isExploit(event.getItem().getItemStack(), p.getWorld().getName().toLowerCase())) {
             event.setCancelled(true);
             p.updateInventory();
             p.sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
