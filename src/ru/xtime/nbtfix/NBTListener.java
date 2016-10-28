@@ -21,6 +21,7 @@ public class NBTListener implements Listener {
         this.plugin = Main;
         this.cc = Bukkit.getPluginManager().getPlugin("ChestCommands") != null;
     }
+    
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onInteract(PlayerInteractEvent event) {
         final Player p = event.getPlayer();
