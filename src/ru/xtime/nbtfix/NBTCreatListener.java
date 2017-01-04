@@ -23,7 +23,6 @@ public class NBTCreatListener extends PacketAdapter {
         ItemStack stack = event.getPacket().getItemModifier().read(0);
         if (stack == null) return;
         if (((Main) getPlugin()).isExploit(stack, p.getWorld().getName().toLowerCase())){
-            p.sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
             p.updateInventory();
         }
     }

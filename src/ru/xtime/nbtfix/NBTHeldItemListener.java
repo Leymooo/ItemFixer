@@ -22,7 +22,6 @@ public class NBTHeldItemListener extends PacketAdapter {
         ItemStack stack = p.getInventory().getItem(event.getPacket().getIntegers().readSafely(0).shortValue());
         if (stack == null) return;
         if (((Main) getPlugin()).isExploit(stack, p.getWorld().getName().toLowerCase())){
-            p.sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
             p.updateInventory();
         }
     }

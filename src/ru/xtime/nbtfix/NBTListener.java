@@ -1,6 +1,5 @@
 package ru.xtime.nbtfix;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -19,7 +18,12 @@ public class NBTListener implements Listener {
     private Boolean cc;
     public NBTListener(Main Main) {
         this.plugin = Main;
-        this.cc = Bukkit.getPluginManager().getPlugin("ChestCommands") != null;
+        try {
+            Class.forName("com.gmail.filoghost.chestcommands.internal.MenuInventoryHolder");
+            cc = true;
+        } catch (ClassNotFoundException e) {
+            cc = false;
+        }
     }
     
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
@@ -27,14 +31,13 @@ public class NBTListener implements Listener {
         final Player p = event.getPlayer();
         if (p.hasPermission("itemfixer.bypass")) return;
         if (event.getItem() == null) return;
-        if (plugin.mc19 && event.getItem().getType() == Material.STRUCTURE_BLOCK) {
+        if (event.getItem().getType() == Material.matchMaterial("STRUCTURE_BLOCK")) {
             p.getInventory().remove(event.getItem());
             event.setCancelled(true);
         }
         if (plugin.isExploit(event.getItem(), p.getWorld().getName().toLowerCase())) {
             event.setCancelled(true);
             p.updateInventory();
-            p.sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
         }
     }
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
@@ -47,7 +50,6 @@ public class NBTListener implements Listener {
         if (plugin.isExploit(event.getCurrentItem(), p.getWorld().getName().toLowerCase())) {
             event.setCancelled(true);
             p.updateInventory();
-            p.sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
         }
     }
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
@@ -55,13 +57,12 @@ public class NBTListener implements Listener {
         final Player p = event.getPlayer();
         if (p.hasPermission("itemfixer.bypass")) return;
         if (event.getItemDrop() == null) return;
-        if (plugin.mc19 && event.getItemDrop().getItemStack().getType() == Material.STRUCTURE_BLOCK) {
+        if (event.getItemDrop().getItemStack().getType() == Material.matchMaterial("STRUCTURE_BLOCK")) {
             event.getItemDrop().remove();
         }
         if (plugin.isExploit(event.getItemDrop().getItemStack(), p.getWorld().getName().toLowerCase())) {
             event.setCancelled(true);
             p.updateInventory();
-            p.sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
         }
     }
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
@@ -69,13 +70,13 @@ public class NBTListener implements Listener {
         final Player p = event.getPlayer();
         if (p.hasPermission("itemfixer.bypass")) return;
         if (event.getItem() == null) return;
-        if (plugin.mc19 && event.getItem().getItemStack().getType() == Material.STRUCTURE_BLOCK) {
+        if (event.getItem().getItemStack().getType() == Material.matchMaterial("STRUCTURE_BLOCK")) {
             event.getItem().remove();
+            event.setCancelled(true);
         }
         if (plugin.isExploit(event.getItem().getItemStack(), p.getWorld().getName().toLowerCase())) {
+            event.getItem().remove();
             event.setCancelled(true);
-            p.updateInventory();
-            p.sendMessage("§cЧитерские вещи запрещены! Если вы продолжите, вы будете забанены!");
         }
     }
 
