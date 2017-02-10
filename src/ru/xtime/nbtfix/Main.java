@@ -36,6 +36,10 @@ public class Main extends JavaPlugin {
         this.msgToCS("&aItemFixer enabled");
     }
     @Override
+    public void onDisable() {
+        ProtocolLibrary.getProtocolManager().removePacketListeners(this);
+    }
+    @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof ConsoleCommandSender) {
             config();

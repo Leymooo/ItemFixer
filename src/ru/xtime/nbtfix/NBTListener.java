@@ -23,8 +23,7 @@ public class NBTListener implements Listener {
             cc = false;
         }
     }
-    
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInvClick(InventoryClickEvent event) {
         if (cc && event.getInventory().getHolder() instanceof MenuInventoryHolder) return;
         if (event.getWhoClicked().getType() != EntityType.PLAYER) return;
