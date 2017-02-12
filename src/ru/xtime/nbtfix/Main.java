@@ -26,6 +26,7 @@ public class Main extends JavaPlugin {
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTHeldItemListener(this));
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
         Bukkit.getPluginManager().registerEvents(new NBTListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new TextureFix(this), this);
         new Thread(new Runnable() {
             @Override
             public void run() {

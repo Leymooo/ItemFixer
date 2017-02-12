@@ -1,8 +1,8 @@
 name: ItemFixer
 author: Leymooo
 main: ru.xtime.nbtfix.Main
-version: 2.7.3
-description: 273
+version: 2.7.4
+description: 274
 depend: [ProtocolLib]
 softdepend: [ChestCommands]
 commands:
