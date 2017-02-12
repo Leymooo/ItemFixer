@@ -20,6 +20,8 @@ public class TextureFix implements Listener {
     HashSet<Material> ignore = new HashSet<Material>();
 
     public TextureFix() {
+        //Вроде все предменты что имеют SubId
+        //Material, MaxSubId
         limit.put(Material.STONE, 6);
         limit.put(Material.DIRT, 2);
         limit.put(Material.WOOD, 5);
@@ -58,7 +60,7 @@ public class TextureFix implements Listener {
         limit.put(Material.GOLDEN_APPLE, 1);
         limit.put(Material.BANNER, 15);
         limit.put(Material.ANVIL, 2);
-
+        //Предметы с прочностью.
         ignore.add(Material.CARROT_STICK);
         ignore.add(Material.BOW);
         ignore.add(Material.FISHING_ROD);
@@ -68,32 +70,42 @@ public class TextureFix implements Listener {
             ignore.add(Material.SHIELD);
             ignore.add(Material.ELYTRA);
         }
+        //Деревянные инструменты
         ignore.add(Material.WOOD_SPADE);
         ignore.add(Material.WOOD_PICKAXE);
         ignore.add(Material.WOOD_AXE);
         ignore.add(Material.WOOD_SWORD);
         ignore.add(Material.WOOD_HOE);
+        
+        //Золотые инструменты
         ignore.add(Material.GOLD_SPADE);
         ignore.add(Material.GOLD_PICKAXE);
         ignore.add(Material.GOLD_AXE);
         ignore.add(Material.GOLD_SWORD);
         ignore.add(Material.GOLD_HOE);
+        
+        //Каменные инструменты
         ignore.add(Material.STONE_SPADE);
         ignore.add(Material.STONE_PICKAXE);
         ignore.add(Material.STONE_AXE);
         ignore.add(Material.STONE_SWORD);
         ignore.add(Material.STONE_HOE);
+        
+        //Железные инструменты
         ignore.add(Material.IRON_SPADE);
         ignore.add(Material.IRON_PICKAXE);
         ignore.add(Material.IRON_AXE);
         ignore.add(Material.IRON_SWORD);
         ignore.add(Material.IRON_HOE);
+        
+        //Алмазные инструменты
         ignore.add(Material.DIAMOND_SPADE);
         ignore.add(Material.DIAMOND_PICKAXE);
         ignore.add(Material.DIAMOND_AXE);
         ignore.add(Material.DIAMOND_SWORD);
         ignore.add(Material.DIAMOND_HOE);
 
+        //Разная броня
         ignore.add(Material.LEATHER_BOOTS);
         ignore.add(Material.LEATHER_CHESTPLATE);
         ignore.add(Material.LEATHER_HELMET);
@@ -153,16 +165,22 @@ public class TextureFix implements Listener {
 
     private boolean isInvalide(ItemStack it) {
         if (it != null && it.getType()!=Material.AIR) {
+            //Игнорим обычные предметы
             if (it.getDurability() != 0) {
+                //Чекаем есть ли этот предмет в лимитах.
                 if (limit.containsKey(it.getType())) {
+                    //Проверяем subid чтобы был не меньше нуля, и не превышал лимит.
                     if (it.getDurability() < 0 || it.getDurability() > limit.get(it.getType())) {
                         return true;
                     }
+                    //У предмета всё норм.
                     return false;
                 }
+                //Чекам на предметы которое могут ломаться. 
                 if (ignore.contains(it.getType())) {
                     return false;
                 }
+                //У нас кривой предмет(
                 return true;
             }
         }
