@@ -3,6 +3,7 @@ package ru.xtime.nbtfix;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -20,6 +21,7 @@ public class TextureFix implements Listener {
     HashSet<Material> ignore = new HashSet<Material>();
 
     public TextureFix() {
+        String version = Bukkit.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3];
         //Вроде все предменты что имеют SubId
         //Material, MaxSubId
         limit.put(Material.STONE, 6);
@@ -60,12 +62,17 @@ public class TextureFix implements Listener {
         limit.put(Material.GOLDEN_APPLE, 1);
         limit.put(Material.BANNER, 15);
         limit.put(Material.ANVIL, 2);
+        limit.put(Material.MONSTER_EGG, 120);
         //Предметы с прочностью.
         ignore.add(Material.CARROT_STICK);
         ignore.add(Material.BOW);
         ignore.add(Material.FISHING_ROD);
         ignore.add(Material.FLINT_AND_STEEL);
         ignore.add(Material.SHEARS);
+        if (version.startsWith("v1_8_R")) {
+            ignore.add(Material.MONSTER_EGG);
+            ignore.add(Material.POTION);
+        }
         if (Material.matchMaterial("SHIELD") != null) {
             ignore.add(Material.SHIELD);
             ignore.add(Material.ELYTRA);
