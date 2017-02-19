@@ -17,16 +17,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.comphenix.protocol.ProtocolLibrary;
 
 public class Main extends JavaPlugin {
-    private Boolean hasUpdates;
+    private Boolean hasUpdates = false;
     ExploitCheck isExploit = new ExploitCheck(this);
     public void onEnable() {
-        hasUpdates = false;
         saveDefaultConfig();
         config();
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTHeldItemListener(this));
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
         Bukkit.getPluginManager().registerEvents(new NBTListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new TextureFix(this), this);
+        Bukkit.getPluginManager().registerEvents(new TextureFix(), this);
         new Thread(new Runnable() {
             @Override
             public void run() {
