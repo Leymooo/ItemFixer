@@ -12,16 +12,20 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.comphenix.protocol.ProtocolLibrary;
+import com.elmakers.mine.bukkit.api.magic.MagicAPI;
 
 public class Main extends JavaPlugin {
     private Boolean hasUpdates = false;
+    private MagicAPI mapi;
     ExploitCheck isExploit = new ExploitCheck(this);
     public void onEnable() {
         saveDefaultConfig();
         config();
+        mapi = getMagicAPI();
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTHeldItemListener(this));
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
         Bukkit.getPluginManager().registerEvents(new NBTListener(this), this);
@@ -54,6 +58,16 @@ public class Main extends JavaPlugin {
     }
     public boolean isExploit(ItemStack stack, String world) {
         return isExploit.isExploit(stack, world);
+    }
+    public boolean isMagicItem(ItemStack it) {
+        return mapi != null && mapi.isWand(it);
+    }
+    public MagicAPI getMagicAPI() {
+        Plugin magicPlugin = Bukkit.getPluginManager().getPlugin("Magic");
+          if (magicPlugin == null || !magicPlugin.isEnabled() || !(magicPlugin instanceof MagicAPI)) {
+              return null;
+          }
+        return (MagicAPI)magicPlugin;
     }
     public void checkUpdate() {
         try {

@@ -63,6 +63,7 @@ public class TextureFix implements Listener {
         limit.put(Material.BANNER, 15);
         limit.put(Material.ANVIL, 2);
         //Предметы с прочностью.
+        ignore.add(Material.MAP);
         ignore.add(Material.CARROT_STICK);
         ignore.add(Material.BOW);
         ignore.add(Material.FISHING_ROD);
