@@ -56,5 +56,4 @@ public class NBTListener implements Listener {
             event.setCancelled(true);
         }
     }
-
 }

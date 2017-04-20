@@ -64,6 +64,7 @@ public class TextureFix implements Listener {
         limit.put(Material.ANVIL, 2);
         //Предметы с прочностью.
         ignore.add(Material.MAP);
+        ignore.add(Material.EMPTY_MAP);
         ignore.add(Material.CARROT_STICK);
         ignore.add(Material.BOW);
         ignore.add(Material.FISHING_ROD);
@@ -132,6 +133,12 @@ public class TextureFix implements Listener {
         ignore.add(Material.DIAMOND_CHESTPLATE);
         ignore.add(Material.DIAMOND_HELMET);
         ignore.add(Material.DIAMOND_LEGGINGS);
+        
+        ignore.add(Material.CHAINMAIL_BOOTS);
+        ignore.add(Material.CHAINMAIL_CHESTPLATE);
+        ignore.add(Material.CHAINMAIL_HELMET);
+        ignore.add(Material.CHAINMAIL_LEGGINGS);
+
 
     }
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)

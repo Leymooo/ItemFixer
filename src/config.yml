@@ -3,6 +3,8 @@
 remove-invalid-enchants: false
 #проверять зачарования
 check-enchants: true
+#проверять обновления
+check-update: true
 #Миры где отключены проверки
 ignore-worlds:
   - "random_mir_228"

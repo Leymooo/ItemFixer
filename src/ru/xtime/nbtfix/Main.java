@@ -30,18 +30,24 @@ public class Main extends JavaPlugin {
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
         Bukkit.getPluginManager().registerEvents(new NBTListener(this), this);
         Bukkit.getPluginManager().registerEvents(new TextureFix(), this);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                checkUpdate();
-                return;
-            }
-        }).start();
+        if (getConfig().getBoolean("check-update")) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    checkUpdate();
+                    return;
+                }
+            }).start();
+        }
         this.msgToCS("&aItemFixer enabled");
     }
     @Override
     public void onDisable() {
         ProtocolLibrary.getProtocolManager().removePacketListeners(this);
+        Bukkit.getScheduler().cancelTasks(this);
+        mapi = null;
+        isExploit = null;
+        NBTCreatListener.needCancel = null;
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -53,7 +59,9 @@ public class Main extends JavaPlugin {
     }
     public void config() {
         reloadConfig();
-        saveConfig();
+        if (!getConfig().isSet("check-update")) {
+            getConfig().set("check-update", true);
+        }
         isExploit.fillLists();
     }
     public boolean isExploit(ItemStack stack, String world) {
@@ -64,9 +72,9 @@ public class Main extends JavaPlugin {
     }
     public MagicAPI getMagicAPI() {
         Plugin magicPlugin = Bukkit.getPluginManager().getPlugin("Magic");
-          if (magicPlugin == null || !magicPlugin.isEnabled() || !(magicPlugin instanceof MagicAPI)) {
-              return null;
-          }
+        if (magicPlugin == null || !magicPlugin.isEnabled() || !(magicPlugin instanceof MagicAPI)) {
+            return null;
+        }
         return (MagicAPI)magicPlugin;
     }
     public void checkUpdate() {
