@@ -28,6 +28,9 @@ public class Main extends JavaPlugin {
         mapi = getMagicAPI();
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTHeldItemListener(this));
         ProtocolLibrary.getProtocolManager().addPacketListener(new NBTCreatListener(this));
+        if (!this.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3].startsWith("v1_11_R")) {
+            ProtocolLibrary.getProtocolManager().addPacketListener(new PacketSpamFix(this));
+        }
         Bukkit.getPluginManager().registerEvents(new NBTListener(this), this);
         Bukkit.getPluginManager().registerEvents(new TextureFix(), this);
         if (getConfig().getBoolean("check-update")) {
