@@ -66,15 +66,15 @@ public class PluginUpdater {
                 //Yay, we found a new update!
                 return UpdaterResult.UPDATE_FOUND;
             }
-            //Updates not found :(
-            return UpdaterResult.UPDATE_NOT_FOUND;
         } catch (MalformedURLException e) {
             throw new UpdaterException(e.getMessage(), this);
         } catch (IOException e) {
             throw new UpdaterException("unhandled error " + e.getMessage(), this);
-        } catch (NumberFormatException ex) {
-            throw new UpdaterException("cannot parse remote version " + ex.getMessage(), this);
+        } catch (NumberFormatException ignore) {
+            //Ignore it.
         }
+        //Updates not found :(
+        return UpdaterResult.UPDATE_NOT_FOUND;
     }
 
     /**

@@ -87,7 +87,7 @@ public class ItemChecker {
                 return true;
             }
             final String tagS = tag.toString();
-            nbt.stream().filter(tag.getKeys()::contains).collect(Collectors.toList()).forEach(tag::remove);
+            nbt.stream().filter(tag.getKeys()::contains).forEach(tag::remove);
             if (tiles.contains(mat) && tag.containsKey("BlockEntityTag")) {
                 tag.remove("BlockEntityTag");
             } else if (mat == Material.WRITTEN_BOOK && (tagS.contains("ClickEvent")||tagS.contains("run_command"))) {
