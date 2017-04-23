@@ -32,12 +32,8 @@ public class Main extends JavaPlugin {
         mapi = getMagicAPI();
         checker = new ItemChecker(this);
         manager = ProtocolLibrary.getProtocolManager();
-        manager.addPacketListener(new NBTHeldItemListener(this));
-        manager.addPacketListener(new NBTCreatListener(this));
-        if (!version.startsWith("v1_11_R")) {
-            manager.addPacketListener(new PacketSpamFix(this));
-        }
-        pmanager.registerEvents(new NBTListener(this), this);
+        manager.addPacketListener(new NBTListener(this, version));
+        pmanager.registerEvents(new NBTBukkitListener(this), this);
         pmanager.registerEvents(new TextureFix(version), this);
         if (getConfig().getBoolean("check-update")) checkUpdate();
         logger.info("ItemFixer enabled");
@@ -50,7 +46,6 @@ public class Main extends JavaPlugin {
         checker = null;
         logger = null;
         manager = null;
-        NBTCreatListener.cancel = null;
     }
     public boolean checkItem(ItemStack stack, String world) {
         return checker.isExploit(stack, world);
@@ -74,7 +69,7 @@ public class Main extends JavaPlugin {
                 BufferedReader source = new BufferedReader(pageInput);
                 Integer latestBuild = Integer.valueOf(source.readLine());
                 Integer currentBuild = Integer.valueOf(this.getDescription().getDescription());
-                if (latestBuild!=currentBuild) logger.warning("Найдено новое обновление! // New update found");
+                if (!latestBuild.equals(currentBuild)) logger.warning("Найдено новое обновление! // New update found");
             } catch (IOException | NumberFormatException e) {
                 logger.warning("Не удалось проверить обновление :( // Can't check update");
                 logger.log(Level.WARNING, "Error: ", e);

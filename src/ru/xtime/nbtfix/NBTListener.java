@@ -1,64 +1,64 @@
 package ru.xtime.nbtfix;
 
+import java.util.HashMap;
 
-import org.bukkit.entity.EntityType;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 
-import com.gmail.filoghost.chestcommands.internal.MenuInventoryHolder;
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
 
-public class NBTListener implements Listener {
-    private final Main plugin;
-    private Boolean cc;
-    public NBTListener(Main Main) {
-        this.plugin = Main;
-        try {
-            Class.forName("com.gmail.filoghost.chestcommands.internal.MenuInventoryHolder");
-            cc = true;
-        } catch (ClassNotFoundException e) {
-            cc = false;
+public class NBTListener extends PacketAdapter {
+    private HashMap<Player, Long> cancel;
+    private String version;
+    public NBTListener(Main plugin, String version) {
+        super(plugin, ListenerPriority.HIGHEST, PacketType.Play.Client.SET_CREATIVE_SLOT, PacketType.Play.Client.HELD_ITEM_SLOT, PacketType.Play.Client.CUSTOM_PAYLOAD);
+        this.version = version;
+        this.cancel = new HashMap<Player, Long>();
+    }
+    @Override
+    public void onPacketReceiving(PacketEvent event) {
+        if (event.isCancelled()) return;
+        Player p = event.getPlayer();
+        if (p == null || !p.isOnline()) return;
+        if (this.needCancel(p)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (p.hasPermission("itemfixer.bypass")) return;
+        if (event.getPacketType() == PacketType.Play.Client.SET_CREATIVE_SLOT && p.getGameMode() == GameMode.CREATIVE) {
+            this.proccessSetCreativeSlot(event, p);
+        } else if (event.getPacketType() == PacketType.Play.Client.HELD_ITEM_SLOT) {
+            this.proccessHeldItemSlot(event, p);
+        } else if (event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD && !version.startsWith("v1_11_R")) {
+            this.proccessCustomPayload(event, p);
         }
     }
-    @EventHandler
-    public void onQiut(PlayerQuitEvent event) {
-        NBTCreatListener.cancel.remove(event.getPlayer());
-    }
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onInvClick(InventoryClickEvent event) {
-        if (cc && event.getInventory().getHolder() instanceof MenuInventoryHolder) return;
-        if (event.getWhoClicked().getType() != EntityType.PLAYER) return;
-        final Player p = (Player) event.getWhoClicked();
-        if (p.hasPermission("itemfixer.bypass")) return;
-        if (event.getCurrentItem() == null) return;
-        if (plugin.checkItem(event.getCurrentItem(), p.getWorld().getName().toLowerCase())) {
-            event.setCancelled(true);
+    
+    private void proccessSetCreativeSlot(PacketEvent event, Player p) {
+        ItemStack stack = event.getPacket().getItemModifier().read(0);
+        if (((Main) getPlugin()).checkItem(stack, p.getWorld().getName().toLowerCase())){
+            this.cancel.put(p, System.currentTimeMillis());
             p.updateInventory();
         }
     }
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
-    public void onDrop(PlayerDropItemEvent event) {
-        final Player p = event.getPlayer();
-        if (p.hasPermission("itemfixer.bypass")) return;
-        if (event.getItemDrop() == null) return;
-        if (plugin.checkItem(event.getItemDrop().getItemStack(), p.getWorld().getName().toLowerCase())) {
-            event.setCancelled(true);
+    private void proccessHeldItemSlot(PacketEvent event, Player p) {
+        ItemStack stack = p.getInventory().getItem(event.getPacket().getIntegers().readSafely(0).shortValue());
+        if (((Main) getPlugin()).checkItem(stack, p.getWorld().getName().toLowerCase())){
             p.updateInventory();
         }
     }
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
-    public void onPickup(PlayerPickupItemEvent event) {
-        final Player p = event.getPlayer();
-        if (p.hasPermission("itemfixer.bypass")) return;
-        if (event.getItem() == null) return;
-        if (plugin.checkItem(event.getItem().getItemStack(), p.getWorld().getName().toLowerCase())) {
-            event.getItem().remove();
-            event.setCancelled(true);
+    private void proccessCustomPayload(PacketEvent event, Player p) {
+        String channel = event.getPacket().getStrings().read(0);
+        if ((channel.equalsIgnoreCase("MC|BEdit") || channel.equalsIgnoreCase("MC|BSign"))) {
+            this.cancel.put(p, System.currentTimeMillis());
         }
+
+    }
+    private boolean needCancel(Player p) {
+        return this.cancel.containsKey(p) && (3000 - (System.currentTimeMillis() - this.cancel.get(p))) > 0;
     }
 }

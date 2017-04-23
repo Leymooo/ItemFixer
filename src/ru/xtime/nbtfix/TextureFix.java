@@ -17,8 +17,8 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class TextureFix implements Listener {
-    HashMap<Material,Integer> limit = new HashMap<Material, Integer>();
-    HashSet<Material> ignore = new HashSet<Material>();
+    private HashMap<Material,Integer> limit = new HashMap<Material, Integer>();
+    private HashSet<Material> ignore = new HashSet<Material>();
 
     public TextureFix(String version) {
         //Вроде все предменты что имеют SubId
@@ -88,7 +88,7 @@ public class TextureFix implements Listener {
         ignore.addAll(Arrays.asList(Material.DIAMOND_BOOTS, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_HELMET, Material.DIAMOND_LEGGINGS));
         ignore.addAll(Arrays.asList(Material.CHAINMAIL_BOOTS, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_HELMET, Material.CHAINMAIL_LEGGINGS));
     }
-    
+
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onHold(PlayerItemHeldEvent e) {
         ItemStack it = e.getPlayer().getInventory().getItem(e.getNewSlot());
@@ -126,19 +126,11 @@ public class TextureFix implements Listener {
     }
 
     private boolean isInvalide(ItemStack it) {
-        if (it != null && it.getType()!=Material.AIR) {
-            if (it.getDurability() != 0) {
-                if (limit.containsKey(it.getType())) {
-                    if (it.getDurability() < 0 || it.getDurability() > limit.get(it.getType())) {
-                        return true;
-                    }
-                    return false;
-                }
-                if (ignore.contains(it.getType())) {
-                    return false;
-                }
-                return true;
+        if (it != null && it.getType()!=Material.AIR && it.getDurability() != 0) {
+            if (limit.containsKey(it.getType())) {
+                return (it.getDurability() < 0 || it.getDurability() > limit.get(it.getType()));
             }
+            return ignore.contains(it.getType());
         }
         return false;
     }

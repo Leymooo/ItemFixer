@@ -60,7 +60,7 @@ public class ItemChecker {
         }
     }
     //
-    private ItemMeta getClearMeta(ItemStack stack) {
+    private ItemMeta getClearItemMeta(ItemStack stack) {
         final ItemMeta meta = stack.getItemMeta();
         for (Map.Entry<Enchantment, Integer> ench : meta.getEnchants().entrySet()) {
             Enchantment Enchant = ench.getKey();
@@ -82,16 +82,10 @@ public class ItemChecker {
         try {
             Material mat = stack.getType();
             NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(stack);
-            if(stack.getAmount() <1 || stack.getAmount()>64 || tag.getKeys().size() > 15 || tag.toString().length() > 12000) {
-                stack.setAmount(1);
+            if(isCrashItem(stack, tag, mat)) {
                 tag.getKeys().clear();
+                stack.setAmount(1);
                 return true;
-            }
-            if (mat == Material.NAME_TAG || tiles.contains(mat)) {
-                if (tag.toString().length() > 600) {
-                    tag.getKeys().clear();
-                    return true;
-                }
             }
             final String tagS = tag.toString();
             nbt.stream().filter(tag.getKeys()::contains).collect(Collectors.toList()).forEach(nbt->{
@@ -111,9 +105,13 @@ public class ItemChecker {
         } catch (Exception e) {
         }
         if (checkench && stack.hasItemMeta() && stack.getItemMeta().hasEnchants()) {
-            stack.setItemMeta(getClearMeta(stack));
+            stack.setItemMeta(getClearItemMeta(stack));
         }
         return false;
+    }
+    private boolean isCrashItem(ItemStack stack, NbtCompound tag, Material mat) {
+        return (stack.getAmount() <1 || stack.getAmount()>64 || tag.getKeys().size() > 15 || tag.toString().length() > 12000) || 
+                ((mat == Material.NAME_TAG || tiles.contains(mat) && tag.toString().length() > 600));
     }
     private NbtCompound getClearEntityTag(NbtCompound enttag) {
         String id = enttag.getString("id");
