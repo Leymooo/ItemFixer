@@ -1,4 +1,4 @@
-package ru.xtime.nbtfix.updater;
+package ru.leymooo.fixer.updater;
 
 import java.util.logging.Level;
 
@@ -7,6 +7,10 @@ import java.util.logging.Level;
  */
 public class UpdaterException extends Exception {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -7371026016860990753L;
     private final String message;
     private final PluginUpdater updater;
 

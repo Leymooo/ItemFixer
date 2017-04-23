@@ -1,4 +1,4 @@
-package ru.xtime.nbtfix;
+package ru.leymooo.fixer;
 
 import java.util.Arrays;
 import java.util.HashMap;

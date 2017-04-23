@@ -1,4 +1,4 @@
-package ru.xtime.nbtfix.updater;
+package ru.leymooo.fixer.updater;
 
 /**
  * Created by Ruslan on 23.04.2017.

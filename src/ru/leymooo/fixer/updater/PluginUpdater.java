@@ -1,4 +1,4 @@
-package ru.xtime.nbtfix.updater;
+package ru.leymooo.fixer.updater;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;

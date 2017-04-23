@@ -1,10 +1,5 @@
-package ru.xtime.nbtfix;
+package ru.leymooo.fixer;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
@@ -13,12 +8,13 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import ru.leymooo.fixer.updater.PluginUpdater;
+import ru.leymooo.fixer.updater.UpdaterException;
+import ru.leymooo.fixer.updater.UpdaterResult;
+
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.elmakers.mine.bukkit.api.magic.MagicAPI;
-import ru.xtime.nbtfix.updater.PluginUpdater;
-import ru.xtime.nbtfix.updater.UpdaterException;
-import ru.xtime.nbtfix.updater.UpdaterResult;
 
 public class Main extends JavaPlugin {
 

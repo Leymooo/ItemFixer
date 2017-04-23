@@ -1,9 +1,8 @@
-package ru.xtime.nbtfix;
+package ru.leymooo.fixer;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -35,7 +34,6 @@ public class ItemChecker {
         removeInvalidEnch = plugin.getConfig().getBoolean("remove-invalid-enchants");
     }
     public void isExploitSkull(NbtCompound root) {
-        // Item
         String tagS = root.toString();
         if(tagS.contains("SkullOwner:") && tagS.contains("Properties:") && tagS.contains("textures:") && tagS.contains("Value:")) {
             String decoded = null;
