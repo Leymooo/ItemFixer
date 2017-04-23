@@ -48,6 +48,8 @@ public class Main extends JavaPlugin {
         manager.removePacketListeners(this);
         mapi = null;
         checker = null;
+        logger = null;
+        manager = null;
         NBTCreatListener.cancel = null;
     }
     public boolean checkItem(ItemStack stack, String world) {

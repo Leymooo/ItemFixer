@@ -19,7 +19,7 @@ public class PacketSpamFix extends PacketAdapter {
         final Player p = event.getPlayer();
         if (p==null) return;
         if (NBTCreatListener.needCancel(p)) {
-            NBTCreatListener.cancel.put(p, System.currentTimeMillis());
+            NBTCreatListener.cancel.replace(p, System.currentTimeMillis());
             event.setCancelled(true);
             return;
         }

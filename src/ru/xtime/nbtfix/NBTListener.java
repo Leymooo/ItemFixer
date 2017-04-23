@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.gmail.filoghost.chestcommands.internal.MenuInventoryHolder;
 
@@ -23,6 +24,10 @@ public class NBTListener implements Listener {
         } catch (ClassNotFoundException e) {
             cc = false;
         }
+    }
+    @EventHandler
+    public void onQiut(PlayerQuitEvent event) {
+        NBTCreatListener.cancel.remove(event.getPlayer());
     }
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInvClick(InventoryClickEvent event) {
