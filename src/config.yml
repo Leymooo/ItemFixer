@@ -1,7 +1,7 @@
 #убирать с предмета зачарования которые предмет не может иметь. 
 #Например с земли будут убираться все зачарования, т.к у неё не может быть зачарований.
 remove-invalid-enchants: false
-#проверять зачарования
+#проверять зачарования 
 check-enchants: true
 #проверять обновления
 check-update: true
@@ -10,28 +10,3 @@ ignore-worlds:
   - "random_mir_228"
   #- "world"
   #- "world2"
-#список нбт тегов для проверки.
-nbt:
-  #ЧУВСТВИТЕЛЬНЫЙ К РЕГИСТРУ.
-  - Items
-  - ActiveEffects
-  - Command
-  - CustomName
-  - AttributeModifiers
-  - Unbreakable
-  - CustomPotionEffects
-spawneggs:
-  - Fuse
-  - CustomName
-  - powered
-  - ActiveEffects
-  - ExplosionPower
-  - Size
-armorstand:
-  - EntityTag
-writtenbook:
-  - ClickEvent
-  - run_command
-inventory:
-#Chest, Dropper, TrappedChest, Dispenser, HOPPER
-  - BlockEntityTag

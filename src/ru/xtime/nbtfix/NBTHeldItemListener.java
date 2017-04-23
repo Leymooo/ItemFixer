@@ -21,7 +21,7 @@ public class NBTHeldItemListener extends PacketAdapter {
         if (p.hasPermission("itemfixer.bypass")) return;
         ItemStack stack = p.getInventory().getItem(event.getPacket().getIntegers().readSafely(0).shortValue());
         if (stack == null) return;
-        if (((Main) getPlugin()).isExploit(stack, p.getWorld().getName().toLowerCase())){
+        if (((Main) getPlugin()).checkItem(stack, p.getWorld().getName().toLowerCase())){
             p.updateInventory();
         }
     }

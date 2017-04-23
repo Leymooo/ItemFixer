@@ -1,9 +1,9 @@
 package ru.xtime.nbtfix;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -20,8 +20,7 @@ public class TextureFix implements Listener {
     HashMap<Material,Integer> limit = new HashMap<Material, Integer>();
     HashSet<Material> ignore = new HashSet<Material>();
 
-    public TextureFix() {
-        String version = Bukkit.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3];
+    public TextureFix(String version) {
         //Вроде все предменты что имеют SubId
         //Material, MaxSubId
         limit.put(Material.STONE, 6);
@@ -63,13 +62,7 @@ public class TextureFix implements Listener {
         limit.put(Material.BANNER, 15);
         limit.put(Material.ANVIL, 2);
         //Предметы с прочностью.
-        ignore.add(Material.MAP);
-        ignore.add(Material.EMPTY_MAP);
-        ignore.add(Material.CARROT_STICK);
-        ignore.add(Material.BOW);
-        ignore.add(Material.FISHING_ROD);
-        ignore.add(Material.FLINT_AND_STEEL);
-        ignore.add(Material.SHEARS);
+        ignore.addAll(Arrays.asList(Material.MAP, Material.EMPTY_MAP, Material.CARROT_STICK, Material.BOW, Material.FISHING_ROD, Material.FLINT_AND_STEEL, Material.SHEARS));
         if (version.startsWith("v1_8_R")) {
             ignore.add(Material.MONSTER_EGG);
             ignore.add(Material.POTION);
@@ -79,68 +72,23 @@ public class TextureFix implements Listener {
             ignore.add(Material.ELYTRA);
         }
         //Деревянные инструменты
-        ignore.add(Material.WOOD_SPADE);
-        ignore.add(Material.WOOD_PICKAXE);
-        ignore.add(Material.WOOD_AXE);
-        ignore.add(Material.WOOD_SWORD);
-        ignore.add(Material.WOOD_HOE);
-        
+        ignore.addAll(Arrays.asList(Material.WOOD_SPADE, Material.WOOD_PICKAXE, Material.WOOD_AXE, Material.WOOD_SWORD, Material.WOOD_HOE));
         //Золотые инструменты
-        ignore.add(Material.GOLD_SPADE);
-        ignore.add(Material.GOLD_PICKAXE);
-        ignore.add(Material.GOLD_AXE);
-        ignore.add(Material.GOLD_SWORD);
-        ignore.add(Material.GOLD_HOE);
-        
+        ignore.addAll(Arrays.asList(Material.GOLD_SPADE, Material.GOLD_PICKAXE, Material.GOLD_AXE, Material.GOLD_SWORD, Material.GOLD_HOE));
         //Каменные инструменты
-        ignore.add(Material.STONE_SPADE);
-        ignore.add(Material.STONE_PICKAXE);
-        ignore.add(Material.STONE_AXE);
-        ignore.add(Material.STONE_SWORD);
-        ignore.add(Material.STONE_HOE);
-        
+        ignore.addAll(Arrays.asList(Material.STONE_SPADE, Material.STONE_PICKAXE, Material.STONE_AXE, Material.STONE_SWORD, Material.STONE_HOE));
         //Железные инструменты
-        ignore.add(Material.IRON_SPADE);
-        ignore.add(Material.IRON_PICKAXE);
-        ignore.add(Material.IRON_AXE);
-        ignore.add(Material.IRON_SWORD);
-        ignore.add(Material.IRON_HOE);
-        
+        ignore.addAll(Arrays.asList(Material.IRON_SPADE, Material.IRON_PICKAXE, Material.IRON_AXE, Material.IRON_SWORD, Material.IRON_HOE));
         //Алмазные инструменты
-        ignore.add(Material.DIAMOND_SPADE);
-        ignore.add(Material.DIAMOND_PICKAXE);
-        ignore.add(Material.DIAMOND_AXE);
-        ignore.add(Material.DIAMOND_SWORD);
-        ignore.add(Material.DIAMOND_HOE);
-
+        ignore.addAll(Arrays.asList(Material.DIAMOND_SPADE, Material.DIAMOND_PICKAXE, Material.DIAMOND_AXE, Material.DIAMOND_SWORD, Material.DIAMOND_HOE));
         //Разная броня
-        ignore.add(Material.LEATHER_BOOTS);
-        ignore.add(Material.LEATHER_CHESTPLATE);
-        ignore.add(Material.LEATHER_HELMET);
-        ignore.add(Material.LEATHER_LEGGINGS);
-
-        ignore.add(Material.IRON_BOOTS);
-        ignore.add(Material.IRON_CHESTPLATE);
-        ignore.add(Material.IRON_HELMET);
-        ignore.add(Material.IRON_LEGGINGS);
-
-        ignore.add(Material.GOLD_BOOTS);
-        ignore.add(Material.GOLD_CHESTPLATE);
-        ignore.add(Material.GOLD_HELMET);
-        ignore.add(Material.GOLD_LEGGINGS);
-
-        ignore.add(Material.DIAMOND_BOOTS);
-        ignore.add(Material.DIAMOND_CHESTPLATE);
-        ignore.add(Material.DIAMOND_HELMET);
-        ignore.add(Material.DIAMOND_LEGGINGS);
-        
-        ignore.add(Material.CHAINMAIL_BOOTS);
-        ignore.add(Material.CHAINMAIL_CHESTPLATE);
-        ignore.add(Material.CHAINMAIL_HELMET);
-        ignore.add(Material.CHAINMAIL_LEGGINGS);
-
-
+        ignore.addAll(Arrays.asList(Material.LEATHER_BOOTS, Material.LEATHER_CHESTPLATE, Material.LEATHER_HELMET, Material.LEATHER_LEGGINGS));
+        ignore.addAll(Arrays.asList(Material.IRON_BOOTS, Material.IRON_CHESTPLATE, Material.IRON_HELMET, Material.IRON_LEGGINGS));
+        ignore.addAll(Arrays.asList(Material.GOLD_BOOTS, Material.GOLD_CHESTPLATE, Material.GOLD_HELMET, Material.GOLD_LEGGINGS));
+        ignore.addAll(Arrays.asList(Material.DIAMOND_BOOTS, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_HELMET, Material.DIAMOND_LEGGINGS));
+        ignore.addAll(Arrays.asList(Material.CHAINMAIL_BOOTS, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_HELMET, Material.CHAINMAIL_LEGGINGS));
     }
+    
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onHold(PlayerItemHeldEvent e) {
         ItemStack it = e.getPlayer().getInventory().getItem(e.getNewSlot());
@@ -179,22 +127,16 @@ public class TextureFix implements Listener {
 
     private boolean isInvalide(ItemStack it) {
         if (it != null && it.getType()!=Material.AIR) {
-            //Игнорим обычные предметы
             if (it.getDurability() != 0) {
-                //Чекаем есть ли этот предмет в лимитах.
                 if (limit.containsKey(it.getType())) {
-                    //Проверяем subid чтобы был не меньше нуля, и не превышал лимит.
                     if (it.getDurability() < 0 || it.getDurability() > limit.get(it.getType())) {
                         return true;
                     }
-                    //У предмета всё норм.
                     return false;
                 }
-                //Чекам на предметы которое могут ломаться. 
                 if (ignore.contains(it.getType())) {
                     return false;
                 }
-                //У нас кривой предмет(
                 return true;
             }
         }

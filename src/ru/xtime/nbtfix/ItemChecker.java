@@ -1,0 +1,127 @@
+package ru.xtime.nbtfix;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import com.comphenix.protocol.wrappers.nbt.NbtCompound;
+import com.comphenix.protocol.wrappers.nbt.NbtFactory;
+import com.google.common.io.BaseEncoding;
+
+public class ItemChecker {
+    private Boolean removeInvalidEnch;
+    private Boolean checkench;
+    private HashSet<String> nbt = new HashSet<String>();
+    private HashSet<String> world = new HashSet<String>();
+    private HashSet<Material> tiles = new HashSet<Material>();
+    private Main plugin;
+
+    public ItemChecker(Main main) {
+        this.plugin = main;
+        nbt.addAll(Arrays.asList("ActiveEffects", "Command", "CustomName", "AttributeModifiers", "Unbreakable", "CustomPotionEffects"));
+        tiles.addAll(Arrays.asList(
+                Material.FURNACE,Material.CHEST, Material.DROPPER, Material.DISPENSER, Material.COMMAND, Material.COMMAND_MINECART, Material.HOPPER_MINECART,
+                Material.HOPPER, Material.BREWING_STAND_ITEM, Material.BEACON, Material.SIGN, Material.MOB_SPAWNER, Material.NOTE_BLOCK));
+        for (String w : plugin.getConfig().getStringList("ignore-worlds")) {
+            world.add(w.toLowerCase());
+        }
+        checkench = plugin.getConfig().getBoolean("check-enchants");
+        removeInvalidEnch = plugin.getConfig().getBoolean("remove-invalid-enchants");
+    }
+    public void isExploitSkull(NbtCompound root) {
+        // Item
+        String tagS = root.toString();
+        if(tagS.contains("SkullOwner:") && tagS.contains("Properties:") && tagS.contains("textures:") && tagS.contains("Value:")) {
+            String decoded = null;
+            try {
+                decoded = new String(BaseEncoding.base64().decode(tagS.split("Value:")[1].split("}]},")[0]));
+            } catch (Exception e) {
+                root.remove("SkullOwner");
+                return;
+            }
+            if (decoded.contains("textures") && decoded.contains("SKIN")) {
+                if (decoded.contains("url")) {
+                    String Url = decoded.split("url\":")[1].replace("}", "").replace("\"", "");
+                    if (!Url.startsWith("http://textures.minecraft.net/texture/")) {
+                        root.remove("SkullOwner");
+                    }
+                } else {
+                    root.remove("SkullOwner");
+                }
+            } else {
+                root.remove("SkullOwner");
+            }
+        }
+    }
+    //
+    private ItemMeta getClearMeta(ItemStack stack) {
+        final ItemMeta meta = stack.getItemMeta();
+        for (Map.Entry<Enchantment, Integer> ench : meta.getEnchants().entrySet()) {
+            Enchantment Enchant = ench.getKey();
+            if (removeInvalidEnch && !Enchant.canEnchantItem(stack) ) {
+                meta.removeEnchant(Enchant);
+            }
+            if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) {
+                meta.removeEnchant(Enchant);
+            }
+        }
+        return meta;
+    }
+    public boolean isExploit(ItemStack stack, String world) {
+        if (stack == null || stack.getType() == Material.AIR) return false;
+        if (this.world.contains(world.toLowerCase()) || plugin.isMagicItem(stack)) {
+            fixItem(stack);
+            return false;
+        }
+        try {
+            Material mat = stack.getType();
+            NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(stack);
+            if(stack.getAmount() <1 || stack.getAmount()>64 || tag.getKeys().size() > 15 || tag.toString().length() > 12000) {
+                stack.setAmount(1);
+                tag.getKeys().clear();
+                return true;
+            }
+            if (mat == Material.NAME_TAG || tiles.contains(mat)) {
+                if (tag.toString().length() > 600) {
+                    tag.getKeys().clear();
+                    return true;
+                }
+            }
+            final String tagS = tag.toString();
+            nbt.stream().filter(tag.getKeys()::contains).collect(Collectors.toList()).forEach(nbt->{
+                tag.remove(nbt);
+            });
+            if (tiles.contains(mat) && tag.containsKey("BlockEntityTag")) {
+                tag.remove("BlockEntityTag");
+            } else if (mat == Material.WRITTEN_BOOK && (tagS.contains("ClickEvent")||tagS.contains("run_command"))) {
+                tag.getKeys().clear();
+            } else if (mat == Material.MONSTER_EGG && (tag.containsKey("EntityTag") && tag.getCompound("EntityTag").getKeys().size()>=2)) {
+                tag.put("EntityTag",getClearEntityTag(tag.getCompound("EntityTag")));
+            } else if (mat == Material.ARMOR_STAND && tag.containsKey("EntityTag")) {
+                tag.remove("EntityTag");
+            } else if ((mat == Material.SKULL || mat == Material.SKULL_ITEM) && stack.getDurability() == 3) {
+                isExploitSkull(tag);
+            }
+        } catch (Exception e) {
+        }
+        if (checkench && stack.hasItemMeta() && stack.getItemMeta().hasEnchants()) {
+            stack.setItemMeta(getClearMeta(stack));
+        }
+        return false;
+    }
+    private NbtCompound getClearEntityTag(NbtCompound enttag) {
+        String id = enttag.getString("id");
+        enttag.getKeys().clear();
+        enttag.put("id",id);
+        return enttag;
+    }
+    private void fixItem(ItemStack stack) {
+        NbtFactory.fromItemTag(stack);
+    }
+}

@@ -1,9 +1,7 @@
 name: ItemFixer
 author: Leymooo
 main: ru.xtime.nbtfix.Main
-version: 2.8.2
-description: 282
+version: 2.8.3
+description: 283
 depend: [ProtocolLib]
 softdepend: [ChestCommands, Magic]
-commands:
-  itemfixerreload:

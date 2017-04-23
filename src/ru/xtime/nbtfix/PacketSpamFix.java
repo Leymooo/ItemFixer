@@ -18,15 +18,16 @@ public class PacketSpamFix extends PacketAdapter {
         if (event.isCancelled()) return;
         final Player p = event.getPlayer();
         if (p==null) return;
-        if (NBTCreatListener.needCancel.containsKey(p)) {
+        if (NBTCreatListener.needCancel(p)) {
+            NBTCreatListener.cancel.put(p, System.currentTimeMillis());
             event.setCancelled(true);
             return;
         }
         PacketContainer packet = event.getPacket();
         String channel = packet.getStrings().read(0);
         if (channel.equalsIgnoreCase("MC|BEdit") || channel.equalsIgnoreCase("MC|BSign")) {
-            if (!NBTCreatListener.needCancel.containsKey(p)) {
-                NBTCreatListener.needCancel.put(p, 0);
+            if (!NBTCreatListener.needCancel(p)) {
+                NBTCreatListener.cancel.put(p, System.currentTimeMillis());
                 return;
             }
             event.setCancelled(true);

@@ -31,7 +31,7 @@ public class NBTListener implements Listener {
         final Player p = (Player) event.getWhoClicked();
         if (p.hasPermission("itemfixer.bypass")) return;
         if (event.getCurrentItem() == null) return;
-        if (plugin.isExploit(event.getCurrentItem(), p.getWorld().getName().toLowerCase())) {
+        if (plugin.checkItem(event.getCurrentItem(), p.getWorld().getName().toLowerCase())) {
             event.setCancelled(true);
             p.updateInventory();
         }
@@ -41,7 +41,7 @@ public class NBTListener implements Listener {
         final Player p = event.getPlayer();
         if (p.hasPermission("itemfixer.bypass")) return;
         if (event.getItemDrop() == null) return;
-        if (plugin.isExploit(event.getItemDrop().getItemStack(), p.getWorld().getName().toLowerCase())) {
+        if (plugin.checkItem(event.getItemDrop().getItemStack(), p.getWorld().getName().toLowerCase())) {
             event.setCancelled(true);
             p.updateInventory();
         }
@@ -51,7 +51,7 @@ public class NBTListener implements Listener {
         final Player p = event.getPlayer();
         if (p.hasPermission("itemfixer.bypass")) return;
         if (event.getItem() == null) return;
-        if (plugin.isExploit(event.getItem().getItemStack(), p.getWorld().getName().toLowerCase())) {
+        if (plugin.checkItem(event.getItem().getItemStack(), p.getWorld().getName().toLowerCase())) {
             event.getItem().remove();
             event.setCancelled(true);
         }
