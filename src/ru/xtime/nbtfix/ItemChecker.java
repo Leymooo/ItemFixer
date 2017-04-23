@@ -76,7 +76,6 @@ public class ItemChecker {
     public boolean isExploit(ItemStack stack, String world) {
         if (stack == null || stack.getType() == Material.AIR) return false;
         if (this.world.contains(world.toLowerCase()) || plugin.isMagicItem(stack)) {
-            fixItem(stack);
             return false;
         }
         try {
@@ -118,8 +117,5 @@ public class ItemChecker {
         enttag.getKeys().clear();
         enttag.put("id",id);
         return enttag;
-    }
-    private void fixItem(ItemStack stack) {
-        NbtFactory.fromItemTag(stack);
     }
 }
