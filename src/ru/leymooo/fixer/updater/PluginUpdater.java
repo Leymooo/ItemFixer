@@ -60,7 +60,11 @@ public class PluginUpdater {
             //Get the first object in array.
             JsonObject object = objects[0];
             //Extract the version from commit message.
-            int version = Integer.parseInt(object.get("commit").getAsJsonObject().get("message").getAsString().replace(".", ""));
+            String[] toParse = object.get("commit").getAsJsonObject().get("message").getAsString().replace(".", "").split("\\n");
+            if (toParse.length == 0) {
+                throw new UpdaterException("commits is empty", this);
+            }
+            int version = Integer.parseInt(toParse[0]);
             //Compare current version with remote version.
             if (version > currentVersion) {
                 //Yay, we found a new update!
