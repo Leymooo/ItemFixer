@@ -27,7 +27,7 @@ public class PluginUpdater {
     //Target plugin
     private final Plugin plugin;
     //Plugin version
-    private double currentVersion;
+    private int currentVersion;
     //GitHub repo
     private final String repositoryUrl;
 
@@ -60,21 +60,21 @@ public class PluginUpdater {
             //Get the first object in array.
             JsonObject object = objects[0];
             //Extract the version from commit message.
-            double version = Double.parseDouble(object.get("commit").getAsJsonObject().get("message").getAsString());
+            int version = Integer.parseInt(object.get("commit").getAsJsonObject().get("message").getAsString().replace(".", ""));
             //Compare current version with remote version.
             if (version > currentVersion) {
                 //Yay, we found a new update!
                 return UpdaterResult.UPDATE_FOUND;
             }
-            //Updates not found :(
-            return UpdaterResult.UPDATE_NOT_FOUND;
         } catch (MalformedURLException e) {
             throw new UpdaterException(e.getMessage(), this);
         } catch (IOException e) {
             throw new UpdaterException("unhandled error " + e.getMessage(), this);
-        } catch (NumberFormatException ex) {
-            throw new UpdaterException("cannot parse remote version " + ex.getMessage(), this);
+        } catch (NumberFormatException ignore) {
+            //Ignore it.
         }
+        //Updates not found :(
+        return UpdaterResult.UPDATE_NOT_FOUND;
     }
 
     /**
@@ -82,9 +82,9 @@ public class PluginUpdater {
      *
      * @return parsed double number.
      */
-    private double parseVersion() throws UpdaterException {
+    private int parseVersion() throws UpdaterException {
         try {
-            return Double.parseDouble(plugin.getDescription().getVersion());
+            return Integer.parseInt(plugin.getDescription().getVersion().replace(".", ""));
         } catch (NumberFormatException ex) {
             throw new UpdaterException("cannot parse version " + ex.getMessage(), this);
         }
@@ -104,7 +104,7 @@ public class PluginUpdater {
      *
      * @return - version number
      */
-    public double getCurrentVersion() {
+    public int getCurrentVersion() {
         return currentVersion;
     }
 }
