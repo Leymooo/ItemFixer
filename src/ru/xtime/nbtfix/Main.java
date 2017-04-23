@@ -16,18 +16,24 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.elmakers.mine.bukkit.api.magic.MagicAPI;
+import ru.xtime.nbtfix.updater.PluginUpdater;
+import ru.xtime.nbtfix.updater.UpdaterException;
+import ru.xtime.nbtfix.updater.UpdaterResult;
 
 public class Main extends JavaPlugin {
+
     private MagicAPI mapi;
     private ItemChecker checker;
     private ProtocolManager manager;
     private Logger logger;
-    
+
+    private final PluginUpdater updater = new PluginUpdater(this, "Dimatert9", "ItemFixer");
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
         PluginManager pmanager = Bukkit.getPluginManager();
-        String version = Bukkit.getServer().getClass().getPackage().getName().replace(".",  ",").split(",")[3];
+        String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
         logger = Bukkit.getLogger();
         mapi = getMagicAPI();
         checker = new ItemChecker(this);
@@ -38,7 +44,7 @@ public class Main extends JavaPlugin {
         if (getConfig().getBoolean("check-update")) checkUpdate();
         logger.info("ItemFixer enabled");
     }
-    
+
     @Override
     public void onDisable() {
         manager.removePacketListeners(this);
@@ -47,33 +53,33 @@ public class Main extends JavaPlugin {
         logger = null;
         manager = null;
     }
+
     public boolean checkItem(ItemStack stack, String world) {
         return checker.isExploit(stack, world);
     }
+
     public boolean isMagicItem(ItemStack it) {
         return mapi != null && mapi.isWand(it);
     }
+
     public MagicAPI getMagicAPI() {
         Plugin magicPlugin = Bukkit.getPluginManager().getPlugin("Magic");
         if (magicPlugin == null || !magicPlugin.isEnabled() || !(magicPlugin instanceof MagicAPI)) {
             return null;
         }
-        return (MagicAPI)magicPlugin;
+        return (MagicAPI) magicPlugin;
     }
-    
+
     public void checkUpdate() {
-         new Thread(()-> {
-            try {
-                URL address = new URL("http://151.80.108.152/version.txt");
-                InputStreamReader pageInput = new InputStreamReader(address.openStream());
-                BufferedReader source = new BufferedReader(pageInput);
-                Integer latestBuild = Integer.valueOf(source.readLine());
-                Integer currentBuild = Integer.valueOf(this.getDescription().getDescription());
-                if (!latestBuild.equals(currentBuild)) logger.warning("Найдено новое обновление! // New update found");
-            } catch (IOException | NumberFormatException e) {
-                logger.warning("Не удалось проверить обновление :( // Can't check update");
-                logger.log(Level.WARNING, "Error: ", e);
+        try {
+            UpdaterResult result = updater.checkUpdates();
+            if (result.hasUpdates()) {
+                getLogger().info("§aНовое обновление найдено! | The new version found!");
+            } else {
+                getLogger().info("§cОбновлений не найдено. | No updates found.");
             }
-        }).start();
+        } catch (UpdaterException e) {
+            e.print();
+        }
     }
 }
