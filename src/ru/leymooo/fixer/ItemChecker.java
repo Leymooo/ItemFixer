@@ -19,11 +19,14 @@ public class ItemChecker {
     private HashSet<String> nbt = new HashSet<String>();
     private HashSet<String> world = new HashSet<String>();
     private HashSet<Material> tiles = new HashSet<Material>();
+    private HashSet<String> ignoreNbt = new HashSet<String>();
     private Main plugin;
 
     public ItemChecker(Main main) {
         this.plugin = main;
+        ignoreNbt.addAll(plugin.getConfig().getStringList("ignore-tags"));
         nbt.addAll(Arrays.asList("ActiveEffects", "Command", "CustomName", "AttributeModifiers", "Unbreakable", "CustomPotionEffects"));
+        nbt.removeAll(ignoreNbt);
         tiles.addAll(Arrays.asList(
                 Material.FURNACE,Material.CHEST, Material.DROPPER, Material.DISPENSER, Material.COMMAND, Material.COMMAND_MINECART, Material.HOPPER_MINECART,
                 Material.HOPPER, Material.BREWING_STAND_ITEM, Material.BEACON, Material.SIGN, Material.MOB_SPAWNER, Material.NOTE_BLOCK));
@@ -86,13 +89,14 @@ public class ItemChecker {
             }
             final String tagS = tag.toString();
             nbt.stream().filter(tag.getKeys()::contains).forEach(tag::remove);
-            if (tiles.contains(mat) && tag.containsKey("BlockEntityTag")) {
+            if (tiles.contains(mat) && !ignoreNbt.contains("BlockEntityTag") &&  tag.containsKey("BlockEntityTag")) {
                 tag.remove("BlockEntityTag");
-            } else if (mat == Material.WRITTEN_BOOK && (tagS.contains("ClickEvent")||tagS.contains("run_command"))) {
+            } else if (mat == Material.WRITTEN_BOOK && ((!ignoreNbt.contains("ClickEvent") && tagS.contains("ClickEvent"))
+                    || (!ignoreNbt.contains("run_command") && tagS.contains("run_command")))) {
                 tag.getKeys().clear();
-            } else if (mat == Material.MONSTER_EGG && (tag.containsKey("EntityTag") && tag.getCompound("EntityTag").getKeys().size()>=2)) {
+            } else if (mat == Material.MONSTER_EGG && !ignoreNbt.contains("EntityTag") && (tag.containsKey("EntityTag") && tag.getCompound("EntityTag").getKeys().size()>=2)) {
                 tag.put("EntityTag",getClearEntityTag(tag.getCompound("EntityTag")));
-            } else if (mat == Material.ARMOR_STAND && tag.containsKey("EntityTag")) {
+            } else if (mat == Material.ARMOR_STAND && !ignoreNbt.contains("EntityTag") && tag.containsKey("EntityTag")) {
                 tag.remove("EntityTag");
             } else if ((mat == Material.SKULL || mat == Material.SKULL_ITEM) && stack.getDurability() == 3) {
                 isExploitSkull(tag);

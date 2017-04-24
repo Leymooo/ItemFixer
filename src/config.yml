@@ -10,3 +10,6 @@ ignore-worlds:
   - "random_mir_228"
   #- "world"
   #- "world2"
+ignore-tags:
+  - tag1
+  - tag2

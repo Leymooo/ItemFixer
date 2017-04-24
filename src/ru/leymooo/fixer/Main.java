@@ -1,5 +1,6 @@
 package ru.leymooo.fixer;
 
+import java.io.File;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
@@ -28,6 +29,7 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        checkNewConfig();
         PluginManager pmanager = Bukkit.getPluginManager();
         String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
         logger = Bukkit.getLogger();
@@ -57,8 +59,15 @@ public class Main extends JavaPlugin {
     public boolean isMagicItem(ItemStack it) {
         return mapi != null && mapi.isWand(it);
     }
+    private void checkNewConfig() {
+        if (!getConfig().isSet("ignore-tags")) {
+            File config = new File(getDataFolder(),"config.yml");
+            config.delete();
+            saveDefaultConfig();
+        }
+    }
 
-    public MagicAPI getMagicAPI() {
+    private MagicAPI getMagicAPI() {
         Plugin magicPlugin = Bukkit.getPluginManager().getPlugin("Magic");
         if (magicPlugin == null || !magicPlugin.isEnabled() || !(magicPlugin instanceof MagicAPI)) {
             return null;
@@ -66,16 +75,18 @@ public class Main extends JavaPlugin {
         return (MagicAPI) magicPlugin;
     }
 
-    public void checkUpdate() {
-        try {
-            UpdaterResult result = updater.checkUpdates();
-            if (result.hasUpdates()) {
-                getLogger().info("§aНовое обновление найдено! | The new version found!");
-            } else {
-                getLogger().info("§cОбновлений не найдено. | No updates found.");
+    private void checkUpdate() {
+        new Thread(()-> {
+            try {
+                UpdaterResult result = updater.checkUpdates();
+                if (result.hasUpdates()) {
+                    getLogger().info("§aНовое обновление найдено! | The new version found!");
+                } else {
+                    getLogger().info("§cОбновлений не найдено. | No updates found.");
+                }
+            } catch (UpdaterException e) {
+                e.print();
             }
-        } catch (UpdaterException e) {
-            e.print();
-        }
+        }).start();
     }
 }

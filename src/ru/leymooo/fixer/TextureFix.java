@@ -130,7 +130,7 @@ public class TextureFix implements Listener {
             if (limit.containsKey(it.getType())) {
                 return (it.getDurability() < 0 || it.getDurability() > limit.get(it.getType()));
             }
-            return ignore.contains(it.getType());
+            return !ignore.contains(it.getType());
         }
         return false;
     }
