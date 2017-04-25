@@ -24,7 +24,7 @@ public class ItemChecker {
 
     public ItemChecker(Main main) {
         this.plugin = main;
-        ignoreNbt.addAll(plugin.getConfig().getStringList("ignore-tags"));
+        ignoreNbt.addAll(plugin.getConfig().getStringList("ignored-tags"));
         nbt.addAll(Arrays.asList("ActiveEffects", "Command", "CustomName", "AttributeModifiers", "Unbreakable", "CustomPotionEffects"));
         nbt.removeAll(ignoreNbt);
         tiles.addAll(Arrays.asList(

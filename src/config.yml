@@ -10,6 +10,7 @@ ignore-worlds:
   - "random_mir_228"
   #- "world"
   #- "world2"
-ignore-tags:
+#какие nbt таги игнорировать. Например "Unbreakable"
+ignored-tags:
   - tag1
   - tag2

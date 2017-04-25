@@ -60,7 +60,7 @@ public class Main extends JavaPlugin {
         return mapi != null && mapi.isWand(it);
     }
     private void checkNewConfig() {
-        if (!getConfig().isSet("ignore-tags")) {
+        if (!getConfig().isSet("ignored-tags")) {
             File config = new File(getDataFolder(),"config.yml");
             config.delete();
             saveDefaultConfig();
@@ -80,9 +80,9 @@ public class Main extends JavaPlugin {
             try {
                 UpdaterResult result = updater.checkUpdates();
                 if (result.hasUpdates()) {
-                    getLogger().info("§aНовое обновление найдено! | The new version found!");
+                    Bukkit.getConsoleSender().sendMessage("[ItemFixer] §cНовое обновление найдено! | The new version found!");
                 } else {
-                    getLogger().info("§cОбновлений не найдено. | No updates found.");
+                    Bukkit.getConsoleSender().sendMessage("[ItemFixer] §aОбновлений не найдено. | No updates found.");
                 }
             } catch (UpdaterException e) {
                 e.print();
