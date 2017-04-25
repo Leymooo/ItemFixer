@@ -109,8 +109,9 @@ public class ItemChecker {
         return false;
     }
     private boolean isCrashItem(ItemStack stack, NbtCompound tag, Material mat) {
-        return (stack.getAmount() <1 || stack.getAmount()>64 || tag.getKeys().size() > 15 || tag.toString().length() > 12000) || 
-                ((mat == Material.NAME_TAG || tiles.contains(mat) && tag.toString().length() > 600));
+        return (stack.getAmount() <1 || stack.getAmount()>64 || tag.getKeys().size() > 15 || tag.toString().length() > 12000)
+                || 
+                ((mat == Material.NAME_TAG || tiles.contains(mat)) && tag.toString().length() > 600);
     }
     private NbtCompound getClearEntityTag(NbtCompound enttag) {
         String id = enttag.getString("id");

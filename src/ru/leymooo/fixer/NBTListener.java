@@ -42,7 +42,7 @@ public class NBTListener extends PacketAdapter {
             this.proccessCustomPayload(event, p);
         }
     }
-    
+
     private void proccessSetCreativeSlot(PacketEvent event, Player p) {
         ItemStack stack = event.getPacket().getItemModifier().readSafely(0);
         if (((Main) getPlugin()).checkItem(stack, p.getWorld().getName().toLowerCase())){
