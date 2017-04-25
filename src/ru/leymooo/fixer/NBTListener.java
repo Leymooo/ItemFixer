@@ -38,7 +38,7 @@ public class NBTListener extends PacketAdapter {
             this.proccessSetCreativeSlot(event, p);
         } else if (event.getPacketType() == PacketType.Play.Client.HELD_ITEM_SLOT) {
             this.proccessHeldItemSlot(event, p);
-        } else if (event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD && !version.startsWith("v1_11_R")) {
+        } else if (event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD) {
             this.proccessCustomPayload(event, p);
         }
     }
@@ -58,7 +58,7 @@ public class NBTListener extends PacketAdapter {
     }
     private void proccessCustomPayload(PacketEvent event, Player p) {
         String channel = event.getPacket().getStrings().readSafely(0);
-        if ("MC|BEdit".equals(channel) || "MC|BSign".equals(channel)) {
+        if (("MC|BEdit".equals(channel) || "MC|BSign".equals(channel)) && !version.startsWith("v1_11_R")) {
             this.cancel.put(p, System.currentTimeMillis());
         } else if ("REGISTER".equals(channel)) {
             checkRegisterChannel(event, p);
