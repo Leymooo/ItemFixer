@@ -28,14 +28,15 @@ public class ItemChecker {
         nbt.addAll(Arrays.asList("ActiveEffects", "Command", "CustomName", "AttributeModifiers", "Unbreakable", "CustomPotionEffects"));
         nbt.removeAll(ignoreNbt);
         tiles.addAll(Arrays.asList(
-                Material.FURNACE,Material.CHEST, Material.DROPPER, Material.DISPENSER, Material.COMMAND, Material.COMMAND_MINECART, Material.HOPPER_MINECART,
-                Material.HOPPER, Material.BREWING_STAND_ITEM, Material.BEACON, Material.SIGN, Material.MOB_SPAWNER, Material.NOTE_BLOCK));
+                Material.FURNACE, Material.CHEST, Material.TRAPPED_CHEST, Material.DROPPER, Material.DISPENSER, Material.COMMAND_MINECART, Material.HOPPER_MINECART,
+                Material.HOPPER, Material.BREWING_STAND_ITEM, Material.BEACON, Material.SIGN, Material.MOB_SPAWNER, Material.NOTE_BLOCK, Material.COMMAND));
         for (String w : plugin.getConfig().getStringList("ignore-worlds")) {
             world.add(w.toLowerCase());
         }
         checkench = plugin.getConfig().getBoolean("check-enchants");
         removeInvalidEnch = plugin.getConfig().getBoolean("remove-invalid-enchants");
     }
+    
     public void isExploitSkull(NbtCompound root) {
         String tagS = root.toString();
         if(tagS.contains("SkullOwner:") && tagS.contains("Properties:") && tagS.contains("textures:") && tagS.contains("Value:")) {
@@ -60,7 +61,7 @@ public class ItemChecker {
             }
         }
     }
-    //
+    
     private ItemMeta getClearItemMeta(ItemStack stack) {
         final ItemMeta meta = stack.getItemMeta();
         for (Map.Entry<Enchantment, Integer> ench : meta.getEnchants().entrySet()) {
@@ -74,6 +75,7 @@ public class ItemChecker {
         }
         return meta;
     }
+    
     public boolean isExploit(ItemStack stack, String world) {
         if (stack == null || stack.getType() == Material.AIR) return false;
         if (this.world.contains(world.toLowerCase()) || plugin.isMagicItem(stack)) {
@@ -108,11 +110,18 @@ public class ItemChecker {
         }
         return false;
     }
+    
     private boolean isCrashItem(ItemStack stack, NbtCompound tag, Material mat) {
-        return (stack.getAmount() <1 || stack.getAmount()>64 || tag.getKeys().size() > 15 || tag.toString().length() > 12000)
-                || 
-                ((mat == Material.NAME_TAG || tiles.contains(mat)) && tag.toString().length() > 600);
+        if (stack.getAmount() <1 || stack.getAmount() > 64 || tag.getKeys().size() > 20) {
+            return true;
+        }
+        int tagL = tag.toString().length();
+        if ((mat == Material.NAME_TAG || tiles.contains(mat)) && tagL > 600) {
+            return true;
+        }
+        return mat == Material.WRITTEN_BOOK ? (tagL >= 22000) : (tagL >= 13000);
     }
+    
     private NbtCompound getClearEntityTag(NbtCompound enttag) {
         String id = enttag.getString("id");
         enttag.getKeys().clear();

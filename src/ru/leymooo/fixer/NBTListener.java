@@ -24,6 +24,7 @@ public class NBTListener extends PacketAdapter {
         this.version = version;
         this.cancel = new HashMap<Player, Long>();
     }
+    
     @Override
     public void onPacketReceiving(PacketEvent event) {
         if (event.isCancelled()) return;
@@ -50,12 +51,14 @@ public class NBTListener extends PacketAdapter {
             p.updateInventory();
         }
     }
+    
     private void proccessHeldItemSlot(PacketEvent event, Player p) {
         ItemStack stack = p.getInventory().getItem(event.getPacket().getIntegers().readSafely(0).shortValue());
         if (((Main) getPlugin()).checkItem(stack, p.getWorld().getName().toLowerCase())){
             p.updateInventory();
         }
     }
+    
     private void proccessCustomPayload(PacketEvent event, Player p) {
         String channel = event.getPacket().getStrings().readSafely(0);
         if (("MC|BEdit".equals(channel) || "MC|BSign".equals(channel)) && !version.startsWith("v1_11_R")) {
@@ -64,6 +67,7 @@ public class NBTListener extends PacketAdapter {
             checkRegisterChannel(event, p);
         }
     }
+    
     /**
      * @author justblender
      */
@@ -82,6 +86,7 @@ public class NBTListener extends PacketAdapter {
         }
         buffer.release();
     }
+    
     private boolean needCancel(Player p) {
         return this.cancel.containsKey(p) && (1200 - (System.currentTimeMillis() - this.cancel.get(p))) > 0;
     }

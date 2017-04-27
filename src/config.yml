@@ -11,6 +11,17 @@ ignore-worlds:
   #- "world"
   #- "world2"
 #какие nbt таги игнорировать. Например "Unbreakable"
+#Список всех тагов, которые плагин проверяет:
+#ActiveEffects
+#Command
+#CustomName
+#AttributeModifiers
+#Unbreakable
+#CustomPotionEffects
+#run_command
+#ClickEvent
+#BlockEntityTag
+#EntityTag
 ignored-tags:
   - tag1
   - tag2

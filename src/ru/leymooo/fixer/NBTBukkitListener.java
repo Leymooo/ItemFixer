@@ -36,6 +36,7 @@ public class NBTBukkitListener implements Listener {
             p.updateInventory();
         }
     }
+    
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onDrop(PlayerDropItemEvent event) {
         final Player p = event.getPlayer();
@@ -46,6 +47,7 @@ public class NBTBukkitListener implements Listener {
             p.updateInventory();
         }
     }
+    
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPickup(PlayerPickupItemEvent event) {
         final Player p = event.getPlayer();
