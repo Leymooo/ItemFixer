@@ -46,6 +46,8 @@ public class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         manager.removePacketListeners(this);
+        NBTListener.cancel.clear();
+        NBTListener.cancel = null;
         mapi = null;
         checker = null;
         logger = null;

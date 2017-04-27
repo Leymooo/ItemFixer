@@ -98,6 +98,7 @@ public class TextureFix implements Listener {
             e.getPlayer().updateInventory();
         }
     }
+    
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onInteract(PlayerInteractEvent e) {
         ItemStack it = e.getItem();
@@ -107,6 +108,7 @@ public class TextureFix implements Listener {
             e.getPlayer().updateInventory();
         }
     }
+    
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onClick(InventoryClickEvent e) {
         ItemStack it = e.getCurrentItem();
@@ -116,6 +118,7 @@ public class TextureFix implements Listener {
             ((Player)e.getWhoClicked()).updateInventory();
         }
     }
+    
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPickup(PlayerPickupItemEvent e) {
         ItemStack it = e.getItem().getItemStack();

@@ -17,12 +17,12 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.google.common.base.Charsets;
 
 public class NBTListener extends PacketAdapter {
-    private HashMap<Player, Long> cancel;
+    public static HashMap<Player, Long> cancel;
     private String version;
     public NBTListener(Main plugin, String version) {
         super(plugin, ListenerPriority.HIGHEST, PacketType.Play.Client.SET_CREATIVE_SLOT, PacketType.Play.Client.HELD_ITEM_SLOT, PacketType.Play.Client.CUSTOM_PAYLOAD);
         this.version = version;
-        this.cancel = new HashMap<Player, Long>();
+        cancel = new HashMap<Player, Long>();
     }
     
     @Override
@@ -47,7 +47,7 @@ public class NBTListener extends PacketAdapter {
     private void proccessSetCreativeSlot(PacketEvent event, Player p) {
         ItemStack stack = event.getPacket().getItemModifier().readSafely(0);
         if (((Main) getPlugin()).checkItem(stack, p.getWorld().getName().toLowerCase())){
-            this.cancel.put(p, System.currentTimeMillis());
+            cancel.put(p, System.currentTimeMillis());
             p.updateInventory();
         }
     }
@@ -62,7 +62,7 @@ public class NBTListener extends PacketAdapter {
     private void proccessCustomPayload(PacketEvent event, Player p) {
         String channel = event.getPacket().getStrings().readSafely(0);
         if (("MC|BEdit".equals(channel) || "MC|BSign".equals(channel)) && !version.startsWith("v1_11_R")) {
-            this.cancel.put(p, System.currentTimeMillis());
+            cancel.put(p, System.currentTimeMillis());
         } else if ("REGISTER".equals(channel)) {
             checkRegisterChannel(event, p);
         }
@@ -88,6 +88,6 @@ public class NBTListener extends PacketAdapter {
     }
     
     private boolean needCancel(Player p) {
-        return this.cancel.containsKey(p) && (1200 - (System.currentTimeMillis() - this.cancel.get(p))) > 0;
+        return cancel.containsKey(p) && (1200 - (System.currentTimeMillis() - cancel.get(p))) > 0;
     }
 }

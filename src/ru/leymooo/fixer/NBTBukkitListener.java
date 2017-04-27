@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.gmail.filoghost.chestcommands.internal.MenuInventoryHolder;
 
@@ -24,6 +25,7 @@ public class NBTBukkitListener implements Listener {
             cc = false;
         }
     }
+    
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInvClick(InventoryClickEvent event) {
         if (cc && event.getInventory().getHolder() instanceof MenuInventoryHolder) return;
@@ -57,5 +59,10 @@ public class NBTBukkitListener implements Listener {
             event.getItem().remove();
             event.setCancelled(true);
         }
+    }
+    
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        NBTListener.cancel.remove(e.getPlayer());
     }
 }
