@@ -14,6 +14,7 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.injector.server.TemporaryPlayerFactory;
 import com.google.common.base.Charsets;
 
 public class NBTListener extends PacketAdapter {
@@ -28,33 +29,33 @@ public class NBTListener extends PacketAdapter {
     @Override
     public void onPacketReceiving(PacketEvent event) {
         if (event.isCancelled()) return;
-        Player p = event.getPlayer();
+        Player p = this.getPlayer(event.getPlayer());
         if (p == null || !p.isOnline()) return;
         if (this.needCancel(p)) {
             event.setCancelled(true);
             return;
         }
-        if (p.hasPermission("itemfixer.bypass")) return;
         if (event.getPacketType() == PacketType.Play.Client.SET_CREATIVE_SLOT && p.getGameMode() == GameMode.CREATIVE) {
             this.proccessSetCreativeSlot(event, p);
         } else if (event.getPacketType() == PacketType.Play.Client.HELD_ITEM_SLOT) {
             this.proccessHeldItemSlot(event, p);
-        } else if (event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD) {
+        } else if (event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD && !p.hasPermission("itemfixer.bypass.packet")) {
             this.proccessCustomPayload(event, p);
         }
     }
 
     private void proccessSetCreativeSlot(PacketEvent event, Player p) {
         ItemStack stack = event.getPacket().getItemModifier().readSafely(0);
-        if (((Main) getPlugin()).checkItem(stack, p.getWorld().getName().toLowerCase())){
+        if (((Main) getPlugin()).checkItem(stack, p)){
             cancel.put(p, System.currentTimeMillis());
             p.updateInventory();
         }
     }
     
     private void proccessHeldItemSlot(PacketEvent event, Player p) {
-        ItemStack stack = p.getInventory().getItem(event.getPacket().getIntegers().readSafely(0).shortValue());
-        if (((Main) getPlugin()).checkItem(stack, p.getWorld().getName().toLowerCase())){
+        Integer i = event.getPacket().getIntegers().readSafely(0);
+        ItemStack stack = (i == null) ? null : p.getInventory().getItem(i.shortValue());
+        if (((Main) getPlugin()).checkItem(stack, p)){
             p.updateInventory();
         }
     }
@@ -89,5 +90,9 @@ public class NBTListener extends PacketAdapter {
     
     private boolean needCancel(Player p) {
         return cancel.containsKey(p) && (1200 - (System.currentTimeMillis() - cancel.get(p))) > 0;
+    }
+    
+    private Player getPlayer(Player p) {
+        return (p instanceof TemporaryPlayerFactory) ? Bukkit.getPlayerExact(p.getName()) : p;
     }
 }

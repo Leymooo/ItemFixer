@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -36,7 +37,7 @@ public class ItemChecker {
         checkench = plugin.getConfig().getBoolean("check-enchants");
         removeInvalidEnch = plugin.getConfig().getBoolean("remove-invalid-enchants");
     }
-    
+
     public void isExploitSkull(NbtCompound root) {
         String tagS = root.toString();
         if(tagS.contains("SkullOwner:") && tagS.contains("Properties:") && tagS.contains("textures:") && tagS.contains("Value:")) {
@@ -61,30 +62,32 @@ public class ItemChecker {
             }
         }
     }
-    
-    private ItemMeta getClearItemMeta(ItemStack stack) {
-        final ItemMeta meta = stack.getItemMeta();
-        for (Map.Entry<Enchantment, Integer> ench : meta.getEnchants().entrySet()) {
-            Enchantment Enchant = ench.getKey();
-            if (removeInvalidEnch && !Enchant.canEnchantItem(stack) ) {
-                meta.removeEnchant(Enchant);
-            }
-            if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) {
-                meta.removeEnchant(Enchant);
+
+    private boolean checkEnchants(ItemStack stack, Player p) {
+        boolean cheat = false;
+        if (checkench && !p.hasPermission("itemfixer.bypass.enchant") && stack.hasItemMeta() && stack.getItemMeta().hasEnchants()) {
+            final ItemMeta meta = stack.getItemMeta();
+            for (Map.Entry<Enchantment, Integer> ench : meta.getEnchants().entrySet()) {
+                Enchantment Enchant = ench.getKey();
+                if (removeInvalidEnch && !Enchant.canEnchantItem(stack) ) {
+                    meta.removeEnchant(Enchant);
+                    cheat = true;
+                }
+                if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) {
+                    meta.removeEnchant(Enchant);
+                    cheat = true;
+                }
             }
         }
-        return meta;
+        return cheat;
     }
     
-    public boolean isExploit(ItemStack stack, String world) {
-        if (stack == null || stack.getType() == Material.AIR) return false;
-        if (this.world.contains(world.toLowerCase()) || plugin.isMagicItem(stack)) {
-            return false;
-        }
+    private boolean checkNbt(ItemStack stack, Player p) {
         try {
+            if (p.hasPermission("itemfixer.bypass.nbt")) return false;
             Material mat = stack.getType();
             NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(stack);
-            if(isCrashItem(stack, tag, mat)) {
+            if(this.isCrashItem(stack, tag, mat)) {
                 tag.getKeys().clear();
                 stack.setAmount(1);
                 return true;
@@ -105,12 +108,16 @@ public class ItemChecker {
             }
         } catch (Exception e) {
         }
-        if (checkench && stack.hasItemMeta() && stack.getItemMeta().hasEnchants()) {
-            stack.setItemMeta(getClearItemMeta(stack));
-        }
         return false;
     }
     
+    public boolean isExploit(ItemStack stack, Player p) {
+        if (stack == null || stack.getType() == Material.AIR) return false;
+        if (this.world.contains(p.getWorld().getName().toLowerCase()) || plugin.isMagicItem(stack)) return false;
+        if (this.checkNbt(stack, p)) return true;
+        return checkEnchants(stack, p);
+    }
+
     private boolean isCrashItem(ItemStack stack, NbtCompound tag, Material mat) {
         if (stack.getAmount() <1 || stack.getAmount() > 64 || tag.getKeys().size() > 20) {
             return true;
@@ -121,7 +128,7 @@ public class ItemChecker {
         }
         return mat == Material.WRITTEN_BOOK ? (tagL >= 22000) : (tagL >= 13000);
     }
-    
+
     private NbtCompound getClearEntityTag(NbtCompound enttag) {
         String id = enttag.getString("id");
         enttag.getKeys().clear();

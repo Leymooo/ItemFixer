@@ -33,7 +33,7 @@ public class NBTBukkitListener implements Listener {
         final Player p = (Player) event.getWhoClicked();
         if (p.hasPermission("itemfixer.bypass")) return;
         if (event.getCurrentItem() == null) return;
-        if (plugin.checkItem(event.getCurrentItem(), p.getWorld().getName().toLowerCase())) {
+        if (plugin.checkItem(event.getCurrentItem(), p)) {
             event.setCancelled(true);
             p.updateInventory();
         }
@@ -44,7 +44,7 @@ public class NBTBukkitListener implements Listener {
         final Player p = event.getPlayer();
         if (p.hasPermission("itemfixer.bypass")) return;
         if (event.getItemDrop() == null) return;
-        if (plugin.checkItem(event.getItemDrop().getItemStack(), p.getWorld().getName().toLowerCase())) {
+        if (plugin.checkItem(event.getItemDrop().getItemStack(), p)) {
             event.setCancelled(true);
             p.updateInventory();
         }
@@ -55,7 +55,7 @@ public class NBTBukkitListener implements Listener {
         final Player p = event.getPlayer();
         if (p.hasPermission("itemfixer.bypass")) return;
         if (event.getItem() == null) return;
-        if (plugin.checkItem(event.getItem().getItemStack(), p.getWorld().getName().toLowerCase())) {
+        if (plugin.checkItem(event.getItem().getItemStack(), p)) {
             event.getItem().remove();
             event.setCancelled(true);
         }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -54,8 +55,8 @@ public class Main extends JavaPlugin {
         manager = null;
     }
 
-    public boolean checkItem(ItemStack stack, String world) {
-        return checker.isExploit(stack, world);
+    public boolean checkItem(ItemStack stack, Player p) {
+        return checker.isExploit(stack, p);
     }
 
     public boolean isMagicItem(ItemStack it) {
