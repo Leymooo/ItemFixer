@@ -29,7 +29,7 @@ public class NBTListener extends PacketAdapter {
     @Override
     public void onPacketReceiving(PacketEvent event) {
         if (event.isCancelled()) return;
-        Player p = this.getPlayer(event.getPlayer());
+        Player p = (event.getPlayer() instanceof TemporaryPlayerFactory) ? null : event.getPlayer();
         if (p == null || !p.isOnline()) return;
         if (this.needCancel(p)) {
             event.setCancelled(true);
@@ -39,7 +39,7 @@ public class NBTListener extends PacketAdapter {
             this.proccessSetCreativeSlot(event, p);
         } else if (event.getPacketType() == PacketType.Play.Client.HELD_ITEM_SLOT) {
             this.proccessHeldItemSlot(event, p);
-        } else if (event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD && !p.hasPermission("itemfixer.bypass.packet")) {
+        } else if (event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD && !isUnsupportedVersion() && !p.hasPermission("itemfixer.bypass.packet")) {
             this.proccessCustomPayload(event, p);
         }
     }
@@ -62,7 +62,7 @@ public class NBTListener extends PacketAdapter {
     
     private void proccessCustomPayload(PacketEvent event, Player p) {
         String channel = event.getPacket().getStrings().readSafely(0);
-        if (("MC|BEdit".equals(channel) || "MC|BSign".equals(channel)) && !version.startsWith("v1_11_R")) {
+        if (("MC|BEdit".equals(channel) || "MC|BSign".equals(channel))) {
             cancel.put(p, System.currentTimeMillis());
         } else if ("REGISTER".equals(channel)) {
             checkRegisterChannel(event, p);
@@ -91,8 +91,7 @@ public class NBTListener extends PacketAdapter {
     private boolean needCancel(Player p) {
         return cancel.containsKey(p) && (1200 - (System.currentTimeMillis() - cancel.get(p))) > 0;
     }
-    
-    private Player getPlayer(Player p) {
-        return (p instanceof TemporaryPlayerFactory) ? Bukkit.getPlayerExact(p.getName()) : p;
+    private boolean isUnsupportedVersion() {
+        return version.startsWith("v1_11_R") || version.startsWith("v1_12_R");
     }
 }

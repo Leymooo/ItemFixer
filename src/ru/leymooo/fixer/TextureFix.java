@@ -61,6 +61,12 @@ public class TextureFix implements Listener {
         limit.put(Material.GOLDEN_APPLE, 1);
         limit.put(Material.BANNER, 15);
         limit.put(Material.ANVIL, 2);
+        if (version.startsWith("v1_12_R")) {
+            limit.put(Material.CONCRETE, 15);
+            limit.put(Material.CONCRETE_POWDER, 15);
+            // Я не знаю куда отнести этот предмет и на всякий случай добавлю в игнор, пока не разберусь как его получить.
+            ignore.add(Material.KNOWLEDGE_BOOK);
+        }
         //Предметы с прочностью.
         ignore.addAll(Arrays.asList(Material.MAP, Material.EMPTY_MAP, Material.CARROT_STICK, Material.BOW, Material.FISHING_ROD, Material.FLINT_AND_STEEL, Material.SHEARS));
         if (version.startsWith("v1_8_R")) {
@@ -71,6 +77,7 @@ public class TextureFix implements Listener {
             ignore.add(Material.SHIELD);
             ignore.add(Material.ELYTRA);
         }
+        
         //Деревянные инструменты
         ignore.addAll(Arrays.asList(Material.WOOD_SPADE, Material.WOOD_PICKAXE, Material.WOOD_AXE, Material.WOOD_SWORD, Material.WOOD_HOE));
         //Золотые инструменты
