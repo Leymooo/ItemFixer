@@ -10,8 +10,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.comphenix.protocol.wrappers.nbt.NbtBase;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
+import com.comphenix.protocol.wrappers.nbt.NbtList;
 import com.google.common.io.BaseEncoding;
 
 public class ItemChecker {
@@ -37,30 +39,71 @@ public class ItemChecker {
         checkench = plugin.getConfig().getBoolean("check-enchants");
         removeInvalidEnch = plugin.getConfig().getBoolean("remove-invalid-enchants");
     }
-
-    public void isExploitSkull(NbtCompound root) {
-        String tagS = root.toString();
-        if(tagS.contains("SkullOwner:") && tagS.contains("Properties:") && tagS.contains("textures:") && tagS.contains("Value:")) {
-            String decoded = null;
-            try {
-                decoded = new String(BaseEncoding.base64().decode(tagS.split("Value:")[1].split("}]},")[0]));
-            } catch (Exception e) {
-                root.remove("SkullOwner");
-                return;
-            }
-            if (decoded.contains("textures") && decoded.contains("SKIN")) {
-                if (decoded.contains("url")) {
-                    String Url = decoded.split("url\":")[1].replace("}", "").replace("\"", "");
-                    if (!Url.startsWith("http://textures.minecraft.net/texture/")) {
-                        root.remove("SkullOwner");
+    //Онет. Пришлось вернуть этот ужас((
+    @SuppressWarnings("rawtypes")
+    public boolean isExploitSkull(NbtCompound root) {
+        // Item
+        if (root.containsKey("SkullOwner")) {
+            NbtCompound skullOwner = root.getCompound("SkullOwner");
+            if (skullOwner.containsKey("Properties")) {
+                NbtCompound properties = skullOwner.getCompound("Properties");
+                if (properties.containsKey("textures")) {
+                    NbtList<NbtBase> textures = properties.getList("textures");
+                    for (NbtBase texture : textures.asCollection()) {
+                        if (texture instanceof NbtCompound) {
+                            // Check for value
+                            if (((NbtCompound) texture).containsKey("Value")) {
+                                if (((NbtCompound) texture).getString("Value").trim().length() > 0) {
+                                    String decoded = null;
+                                    try {
+                                        decoded = new String(BaseEncoding.base64().decode(((NbtCompound) texture).getString("Value")));
+                                    } catch (Exception e) {
+                                        root.remove("SkullOwner");
+                                        return true;
+                                    }
+                                    if (decoded == null || decoded.isEmpty()) {
+                                        root.remove("SkullOwner");
+                                        return true;
+                                    }
+                                    if (decoded.contains("textures") && decoded.contains("SKIN")) {
+                                        if (decoded.contains("url")) {
+                                            String Url = decoded.split("url\":")[1].replace("}", "").replace("\"", "");
+                                            if (Url.isEmpty() || Url.trim().length() == 0) {
+                                                root.remove("SkullOwner");
+                                                return true;
+                                            }
+                                            if (!Url.startsWith("http://textures.minecraft.net/texture/")) {
+                                                root.remove("SkullOwner");
+                                                return true;
+                                            }
+                                        } else {
+                                            root.remove("SkullOwner");
+                                            return true;
+                                        }
+                                    } else {
+                                        root.remove("SkullOwner");
+                                        return true;
+                                    }
+                                } else {
+                                    root.remove("SkullOwner");
+                                    return true;
+                                }
+                            } else {
+                                root.remove("SkullOwner");
+                                return true;
+                            }
+                        }
                     }
                 } else {
                     root.remove("SkullOwner");
+                    return true;
                 }
             } else {
                 root.remove("SkullOwner");
+                return true;
             }
         }
+        return false;
     }
 
     private boolean checkEnchants(ItemStack stack, Player p) {
