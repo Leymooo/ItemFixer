@@ -10,9 +10,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import ru.leymooo.fixer.utils.MiniNbtFactory;
+
 import com.comphenix.protocol.wrappers.nbt.NbtBase;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
-import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import com.comphenix.protocol.wrappers.nbt.NbtList;
 import com.google.common.io.BaseEncoding;
 
@@ -121,6 +122,7 @@ public class ItemChecker {
                     cheat = true;
                 }
             }
+            if (cheat) stack.setItemMeta(meta);
         }
         return cheat;
     }
@@ -129,7 +131,8 @@ public class ItemChecker {
         try {
             if (p.hasPermission("itemfixer.bypass.nbt")) return false;
             Material mat = stack.getType();
-            NbtCompound tag = (NbtCompound) NbtFactory.fromItemTag(stack);
+            NbtCompound tag = (NbtCompound) MiniNbtFactory.fromItemTag(stack);
+            if (tag == null) return false;
             if(this.isCrashItem(stack, tag, mat)) {
                 tag.getKeys().clear();
                 stack.setAmount(1);
@@ -171,7 +174,7 @@ public class ItemChecker {
         }
         return mat == Material.WRITTEN_BOOK ? (tagL >= 22000) : (tagL >= 13000);
     }
-
+    
     private NbtCompound getClearEntityTag(NbtCompound enttag) {
         String id = enttag.getString("id");
         enttag.getKeys().clear();
