@@ -18,11 +18,11 @@ import com.comphenix.protocol.injector.server.TemporaryPlayerFactory;
 import com.google.common.base.Charsets;
 
 public class NBTListener extends PacketAdapter {
+    
     public static HashMap<Player, Long> cancel;
-    private String version;
+    
     public NBTListener(Main plugin, String version) {
         super(plugin, ListenerPriority.HIGHEST, PacketType.Play.Client.SET_CREATIVE_SLOT, PacketType.Play.Client.HELD_ITEM_SLOT, PacketType.Play.Client.CUSTOM_PAYLOAD);
-        this.version = version;
         cancel = new HashMap<Player, Long>();
     }
     
@@ -39,7 +39,7 @@ public class NBTListener extends PacketAdapter {
             this.proccessSetCreativeSlot(event, p);
         } else if (event.getPacketType() == PacketType.Play.Client.HELD_ITEM_SLOT) {
             this.proccessHeldItemSlot(event, p);
-        } else if (event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD && !isUnsupportedVersion() && !p.hasPermission("itemfixer.bypass.packet")) {
+        } else if (event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD && !((Main) getPlugin()).isUnsupportedVersion() && !p.hasPermission("itemfixer.bypass.packet")) {
             this.proccessCustomPayload(event, p);
         }
     }
@@ -56,6 +56,7 @@ public class NBTListener extends PacketAdapter {
         Integer i = event.getPacket().getIntegers().readSafely(0);
         ItemStack stack = (i == null) ? null : p.getInventory().getItem(i.shortValue());
         if (((Main) getPlugin()).checkItem(stack, p)){
+            event.setCancelled(true);
             p.updateInventory();
         }
     }
@@ -90,8 +91,5 @@ public class NBTListener extends PacketAdapter {
     
     private boolean needCancel(Player p) {
         return cancel.containsKey(p) && (1200 - (System.currentTimeMillis() - cancel.get(p))) > 0;
-    }
-    private boolean isUnsupportedVersion() {
-        return version.startsWith("v1_11_R") || version.startsWith("v1_12_R");
     }
 }

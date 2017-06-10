@@ -1,4 +1,4 @@
-package ru.leymooo.fixer.updater;
+package me.catcoder.updatechecker;
 
 /**
  * Created by Ruslan on 23.04.2017.

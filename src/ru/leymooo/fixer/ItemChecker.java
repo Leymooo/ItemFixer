@@ -5,9 +5,11 @@ import java.util.HashSet;
 import java.util.Map;
 
 import org.bukkit.Material;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import ru.leymooo.fixer.utils.MiniNbtFactory;
@@ -18,6 +20,7 @@ import com.comphenix.protocol.wrappers.nbt.NbtList;
 import com.google.common.io.BaseEncoding;
 
 public class ItemChecker {
+
     private Boolean removeInvalidEnch;
     private Boolean checkench;
     private HashSet<String> nbt = new HashSet<String>();
@@ -40,69 +43,50 @@ public class ItemChecker {
         checkench = plugin.getConfig().getBoolean("check-enchants");
         removeInvalidEnch = plugin.getConfig().getBoolean("remove-invalid-enchants");
     }
-    //Онет. Пришлось вернуть этот ужас((
+
     @SuppressWarnings("rawtypes")
-    public boolean isExploitSkull(NbtCompound root) {
-        // Item
-        if (root.containsKey("SkullOwner")) {
-            NbtCompound skullOwner = root.getCompound("SkullOwner");
+    public boolean isCrashSkull(NbtCompound tag) {
+        if (tag.containsKey("SkullOwner")) {
+            NbtCompound skullOwner = tag.getCompound("SkullOwner");
             if (skullOwner.containsKey("Properties")) {
                 NbtCompound properties = skullOwner.getCompound("Properties");
                 if (properties.containsKey("textures")) {
                     NbtList<NbtBase> textures = properties.getList("textures");
                     for (NbtBase texture : textures.asCollection()) {
                         if (texture instanceof NbtCompound) {
-                            // Check for value
                             if (((NbtCompound) texture).containsKey("Value")) {
                                 if (((NbtCompound) texture).getString("Value").trim().length() > 0) {
                                     String decoded = null;
                                     try {
                                         decoded = new String(BaseEncoding.base64().decode(((NbtCompound) texture).getString("Value")));
                                     } catch (Exception e) {
-                                        root.remove("SkullOwner");
+                                        tag.remove("SkullOwner");
                                         return true;
                                     }
                                     if (decoded == null || decoded.isEmpty()) {
-                                        root.remove("SkullOwner");
+                                        tag.remove("SkullOwner");
                                         return true;
                                     }
                                     if (decoded.contains("textures") && decoded.contains("SKIN")) {
                                         if (decoded.contains("url")) {
                                             String Url = decoded.split("url\":")[1].replace("}", "").replace("\"", "");
                                             if (Url.isEmpty() || Url.trim().length() == 0) {
-                                                root.remove("SkullOwner");
+                                                tag.remove("SkullOwner");
                                                 return true;
                                             }
-                                            if (!Url.startsWith("http://textures.minecraft.net/texture/")) {
-                                                root.remove("SkullOwner");
-                                                return true;
+                                            if (Url.startsWith("http://textures.minecraft.net/texture/")) {
+                                                return false;
                                             }
-                                        } else {
-                                            root.remove("SkullOwner");
-                                            return true;
                                         }
-                                    } else {
-                                        root.remove("SkullOwner");
-                                        return true;
                                     }
-                                } else {
-                                    root.remove("SkullOwner");
-                                    return true;
                                 }
-                            } else {
-                                root.remove("SkullOwner");
-                                return true;
                             }
                         }
                     }
-                } else {
-                    root.remove("SkullOwner");
-                    return true;
                 }
-            } else {
-                root.remove("SkullOwner");
-                return true;
             }
+            tag.remove("SkullOwner");
+            return true;
         }
         return false;
     }
@@ -126,8 +110,9 @@ public class ItemChecker {
         }
         return cheat;
     }
-    
+
     private boolean checkNbt(ItemStack stack, Player p) {
+        boolean cheat = false;
         try {
             if (p.hasPermission("itemfixer.bypass.nbt")) return false;
             Material mat = stack.getType();
@@ -139,28 +124,60 @@ public class ItemChecker {
                 return true;
             }
             final String tagS = tag.toString();
-            nbt.stream().filter(tag.getKeys()::contains).forEach(tag::remove);
+            for (String nbt1 : nbt) {
+                if (tag.containsKey(nbt1)) {
+                    tag.remove(nbt1);
+                    cheat = true;
+                }
+            }
             if (tiles.contains(mat) && !ignoreNbt.contains("BlockEntityTag") &&  tag.containsKey("BlockEntityTag")) {
                 tag.remove("BlockEntityTag");
+                cheat = true;
             } else if (mat == Material.WRITTEN_BOOK && ((!ignoreNbt.contains("ClickEvent") && tagS.contains("ClickEvent"))
                     || (!ignoreNbt.contains("run_command") && tagS.contains("run_command")))) {
                 tag.getKeys().clear();
+                cheat = true;
             } else if (mat == Material.MONSTER_EGG && !ignoreNbt.contains("EntityTag") && (tag.containsKey("EntityTag") && tag.getCompound("EntityTag").getKeys().size()>=2)) {
                 tag.put("EntityTag",getClearEntityTag(tag.getCompound("EntityTag")));
+                cheat = true;
             } else if (mat == Material.ARMOR_STAND && !ignoreNbt.contains("EntityTag") && tag.containsKey("EntityTag")) {
                 tag.remove("EntityTag");
+                cheat = true;
             } else if ((mat == Material.SKULL || mat == Material.SKULL_ITEM) && stack.getDurability() == 3) {
-                isExploitSkull(tag);
+                if (isCrashSkull(tag)) {
+                    cheat = true;
+                }
             }
         } catch (Exception e) {
         }
-        return false;
+        return cheat;
+    }
+
+    private void checkShulkerBox(ItemStack stack, Player p) {
+        if (!plugin.isUnsupportedVersion()) return;
+        if (!stack.hasItemMeta()) return;
+        if (!(stack.getItemMeta() instanceof BlockStateMeta)) return;
+        BlockStateMeta meta = (BlockStateMeta) stack.getItemMeta();
+        if (!(meta.getBlockState() instanceof ShulkerBox)) return;
+        ShulkerBox box = (ShulkerBox) meta.getBlockState();
+        for (ItemStack is : box.getInventory().getContents()) {
+            if (isHackedItem(is, p)) {
+                box.getInventory().clear();
+                meta.setBlockState(box);
+                stack.setItemMeta(meta);
+                return;
+            }
+        }
     }
     
-    public boolean isExploit(ItemStack stack, Player p) {
+    public boolean isHackedItem(ItemStack stack, Player p) {
         if (stack == null || stack.getType() == Material.AIR) return false;
         if (this.world.contains(p.getWorld().getName().toLowerCase()) || plugin.isMagicItem(stack)) return false;
-        if (this.checkNbt(stack, p)) return true;
+        this.checkShulkerBox(stack, p);
+        if (this.checkNbt(stack, p)) {
+            checkEnchants(stack, p);
+            return true;
+        }
         return checkEnchants(stack, p);
     }
 
@@ -172,9 +189,10 @@ public class ItemChecker {
         if ((mat == Material.NAME_TAG || tiles.contains(mat)) && tagL > 600) {
             return true;
         }
+        if (stack.hasItemMeta() && (stack.getItemMeta() instanceof BlockStateMeta)) return false;
         return mat == Material.WRITTEN_BOOK ? (tagL >= 22000) : (tagL >= 13000);
     }
-    
+
     private NbtCompound getClearEntityTag(NbtCompound enttag) {
         String id = enttag.getString("id");
         enttag.getKeys().clear();

@@ -1,4 +1,4 @@
-package ru.leymooo.fixer.updater;
+package me.catcoder.updatechecker;
 
 import java.util.logging.Level;
 

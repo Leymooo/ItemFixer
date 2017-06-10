@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class TextureFix implements Listener {
+    
     private HashMap<Material,Integer> limit = new HashMap<Material, Integer>();
     private HashSet<Material> ignore = new HashSet<Material>();
 
@@ -64,8 +65,7 @@ public class TextureFix implements Listener {
         if (version.startsWith("v1_12_R")) {
             limit.put(Material.CONCRETE, 15);
             limit.put(Material.CONCRETE_POWDER, 15);
-            // Я не знаю куда отнести этот предмет и на всякий случай добавлю в игнор, пока не разберусь как его получить.
-            ignore.add(Material.KNOWLEDGE_BOOK);
+            limit.put(Material.BED, 15);
         }
         //Предметы с прочностью.
         ignore.addAll(Arrays.asList(Material.MAP, Material.EMPTY_MAP, Material.CARROT_STICK, Material.BOW, Material.FISHING_ROD, Material.FLINT_AND_STEEL, Material.SHEARS));

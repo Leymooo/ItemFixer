@@ -1,4 +1,4 @@
-package ru.leymooo.fixer.updater;
+package me.catcoder.updatechecker;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
@@ -66,7 +66,7 @@ public class PluginUpdater {
             }
             int version = Integer.parseInt(toParse[0]);
             //Compare current version with remote version.
-            if (version > currentVersion) {
+            if (version != currentVersion) {
                 //Yay, we found a new update!
                 return UpdaterResult.UPDATE_FOUND;
             }

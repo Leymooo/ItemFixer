@@ -11,16 +11,19 @@ import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import com.comphenix.protocol.wrappers.nbt.NbtWrapper;
 
 public class MiniNbtFactory {
+    
     private static Method m;
+    
     static {
         try {
             m = NbtFactory.class.getDeclaredMethod("getStackModifier", ItemStack.class);
             m.setAccessible(true);
         } catch (NoSuchMethodException | SecurityException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
+    
+    @SuppressWarnings("unchecked")
     public static NbtWrapper<?> fromItemTag(ItemStack stack) {        
         StructureModifier<NbtBase<?>> modifier = null;
         try {
@@ -30,7 +33,7 @@ public class MiniNbtFactory {
             e.printStackTrace();
         }
         NbtBase<?> result = modifier.read(0);
-        //Try fix old items
+        //Try fix old items 
         if (result != null && result.toString().contains("{\"name\": \"null\"}")) {
             modifier.write(0, null);
             result = modifier.read(0);
