@@ -1,6 +1,6 @@
 name: ItemFixer
 author: Leymooo
 main: ru.leymooo.fixer.Main
-version: 2.9.3
+version: 2.9.4
 depend: [ProtocolLib]
-softdepend: [ChestCommands, Magic]
+softdepend: [ChestCommands, Magic, ArtMap]

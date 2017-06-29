@@ -2,7 +2,7 @@ package ru.leymooo.fixer;
 
 import io.netty.buffer.ByteBuf;
 
-import java.util.HashMap;
+import java.util.WeakHashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -14,22 +14,21 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.injector.server.TemporaryPlayerFactory;
 import com.google.common.base.Charsets;
 
 public class NBTListener extends PacketAdapter {
     
-    public static HashMap<Player, Long> cancel;
+    public static WeakHashMap<Player, Long> cancel;
     
     public NBTListener(Main plugin, String version) {
         super(plugin, ListenerPriority.HIGHEST, PacketType.Play.Client.SET_CREATIVE_SLOT, PacketType.Play.Client.HELD_ITEM_SLOT, PacketType.Play.Client.CUSTOM_PAYLOAD);
-        cancel = new HashMap<Player, Long>();
+        cancel = new WeakHashMap<Player, Long>();
     }
     
     @Override
     public void onPacketReceiving(PacketEvent event) {
         if (event.isCancelled()) return;
-        Player p = (event.getPlayer() instanceof TemporaryPlayerFactory) ? null : event.getPlayer();
+        Player p = Bukkit.getPlayerExact(event.getPlayer().getName());
         if (p == null || !p.isOnline()) return;
         if (this.needCancel(p)) {
             event.setCancelled(true);

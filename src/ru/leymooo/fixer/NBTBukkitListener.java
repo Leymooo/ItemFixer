@@ -52,5 +52,6 @@ public class NBTBukkitListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         NBTListener.cancel.remove(event.getPlayer());
+        PPSListener.ppsPlayerByPlayer.remove(event.getPlayer());
     }
 }

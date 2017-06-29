@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import me.Fupery.ArtMap.Recipe.ArtMaterial;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -15,6 +18,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 public class TextureFix implements Listener {
     
@@ -72,6 +76,7 @@ public class TextureFix implements Listener {
         if (version.startsWith("v1_8_R")) {
             ignore.add(Material.MONSTER_EGG);
             ignore.add(Material.POTION);
+            limit.put(Material.SKULL_ITEM, 4);
         }
         if (Material.matchMaterial("SHIELD") != null) {
             ignore.add(Material.SHIELD);
@@ -94,8 +99,29 @@ public class TextureFix implements Listener {
         ignore.addAll(Arrays.asList(Material.GOLD_BOOTS, Material.GOLD_CHESTPLATE, Material.GOLD_HELMET, Material.GOLD_LEGGINGS));
         ignore.addAll(Arrays.asList(Material.DIAMOND_BOOTS, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_HELMET, Material.DIAMOND_LEGGINGS));
         ignore.addAll(Arrays.asList(Material.CHAINMAIL_BOOTS, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_HELMET, Material.CHAINMAIL_LEGGINGS));
+        
+        initArtMapApi();
     }
-
+    
+    private boolean useArtMap = false;
+    private void initArtMapApi() {
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("ArtMap");
+        if (plugin != null && plugin.isEnabled()) {
+            useArtMap = true;
+        }
+    }
+    
+    private boolean isArtMapItem(ItemStack stack) {
+        if (useArtMap) {
+            for (ArtMaterial art : ArtMaterial.values()) {
+                if (art.isValidMaterial(stack)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onHold(PlayerItemHeldEvent e) {
         ItemStack it = e.getPlayer().getInventory().getItem(e.getNewSlot());
@@ -136,7 +162,7 @@ public class TextureFix implements Listener {
     }
 
     private boolean isInvalide(ItemStack it) {
-        if (it != null && it.getType()!=Material.AIR && it.getDurability() != 0) {
+        if (it != null && it.getType()!=Material.AIR && it.getDurability() != 0 && !isArtMapItem(it)) {
             if (limit.containsKey(it.getType())) {
                 return (it.getDurability() < 0 || it.getDurability() > limit.get(it.getType()));
             }

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
 import org.bukkit.Material;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.enchantments.Enchantment;
@@ -17,7 +18,6 @@ import ru.leymooo.fixer.utils.MiniNbtFactory;
 import com.comphenix.protocol.wrappers.nbt.NbtBase;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtList;
-import com.google.common.io.BaseEncoding;
 
 public class ItemChecker {
 
@@ -36,7 +36,7 @@ public class ItemChecker {
         nbt.removeAll(ignoreNbt);
         tiles.addAll(Arrays.asList(
                 Material.FURNACE, Material.CHEST, Material.TRAPPED_CHEST, Material.DROPPER, Material.DISPENSER, Material.COMMAND_MINECART, Material.HOPPER_MINECART,
-                Material.HOPPER, Material.BREWING_STAND_ITEM, Material.BEACON, Material.SIGN, Material.MOB_SPAWNER, Material.NOTE_BLOCK, Material.COMMAND));
+                Material.HOPPER, Material.BREWING_STAND_ITEM, Material.BEACON, Material.SIGN, Material.MOB_SPAWNER, Material.NOTE_BLOCK, Material.COMMAND, Material.JUKEBOX));
         for (String w : plugin.getConfig().getStringList("ignore-worlds")) {
             world.add(w.toLowerCase());
         }
@@ -58,7 +58,7 @@ public class ItemChecker {
                                 if (((NbtCompound) texture).getString("Value").trim().length() > 0) {
                                     String decoded = null;
                                     try {
-                                        decoded = new String(BaseEncoding.base64().decode(((NbtCompound) texture).getString("Value")));
+                                        decoded = new String(Base64.decodeBase64(((NbtCompound) texture).getString("Value")));
                                     } catch (Exception e) {
                                         tag.remove("SkullOwner");
                                         return true;
@@ -69,12 +69,18 @@ public class ItemChecker {
                                     }
                                     if (decoded.contains("textures") && decoded.contains("SKIN")) {
                                         if (decoded.contains("url")) {
-                                            String Url = decoded.split("url\":")[1].replace("}", "").replace("\"", "");
-                                            if (Url.isEmpty() || Url.trim().length() == 0) {
+                                            String Url = null;
+                                            try {
+                                                Url = decoded.split("url\":")[1].replace("}", "").replace("\"", "");
+                                            } catch (ArrayIndexOutOfBoundsException e) {
                                                 tag.remove("SkullOwner");
                                                 return true;
                                             }
-                                            if (Url.startsWith("http://textures.minecraft.net/texture/")) {
+                                            if (Url == null || Url.isEmpty() || Url.trim().length() == 0) {
+                                                tag.remove("SkullOwner");
+                                                return true;
+                                            }
+                                            if (Url.startsWith("http://textures.minecraft.net/texture/") || Url.startsWith("https://textures.minecraft.net/texture/")) {
                                                 return false;
                                             }
                                         }
@@ -102,8 +108,10 @@ public class ItemChecker {
                     cheat = true;
                 }
                 if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) {
-                    meta.removeEnchant(Enchant);
-                    cheat = true;
+                    if (!p.hasPermission("itemfixer.allow."+stack.getType().toString()+"."+Enchant.getName()+"."+ench.getValue())) {
+                        meta.removeEnchant(Enchant);
+                        cheat = true;
+                    }
                 }
             }
             if (cheat) stack.setItemMeta(meta);
@@ -154,11 +162,8 @@ public class ItemChecker {
     }
 
     private void checkShulkerBox(ItemStack stack, Player p) {
-        if (!plugin.isUnsupportedVersion()) return;
-        if (!stack.hasItemMeta()) return;
-        if (!(stack.getItemMeta() instanceof BlockStateMeta)) return;
+        if (!isShulkerBox(stack)) return;
         BlockStateMeta meta = (BlockStateMeta) stack.getItemMeta();
-        if (!(meta.getBlockState() instanceof ShulkerBox)) return;
         ShulkerBox box = (ShulkerBox) meta.getBlockState();
         for (ItemStack is : box.getInventory().getContents()) {
             if (isHackedItem(is, p)) {
@@ -169,7 +174,15 @@ public class ItemChecker {
             }
         }
     }
-    
+
+    private boolean isShulkerBox(ItemStack stack) {
+        if (!plugin.isUnsupportedVersion()) return false;
+        if (!stack.hasItemMeta()) return false;
+        if (!(stack.getItemMeta() instanceof BlockStateMeta)) return false;
+        BlockStateMeta meta = (BlockStateMeta) stack.getItemMeta();
+        return meta.getBlockState() instanceof ShulkerBox;
+    }
+
     public boolean isHackedItem(ItemStack stack, Player p) {
         if (stack == null || stack.getType() == Material.AIR) return false;
         if (this.world.contains(p.getWorld().getName().toLowerCase()) || plugin.isMagicItem(stack)) return false;
@@ -189,7 +202,7 @@ public class ItemChecker {
         if ((mat == Material.NAME_TAG || tiles.contains(mat)) && tagL > 600) {
             return true;
         }
-        if (stack.hasItemMeta() && (stack.getItemMeta() instanceof BlockStateMeta)) return false;
+        if (isShulkerBox(stack)) return false;
         return mat == Material.WRITTEN_BOOK ? (tagL >= 22000) : (tagL >= 13000);
     }
 
