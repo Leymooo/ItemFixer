@@ -4,9 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import me.Fupery.ArtMap.Recipe.ArtMaterial;
-
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -18,14 +15,15 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 
 public class TextureFix implements Listener {
-    
+
     private HashMap<Material,Integer> limit = new HashMap<Material, Integer>();
     private HashSet<Material> ignore = new HashSet<Material>();
+    private Main plugin;
 
-    public TextureFix(String version) {
+    public TextureFix(String version, Main main) {
+        this.plugin = main;
         //Вроде все предменты что имеют SubId
         //Material, MaxSubId
         limit.put(Material.STONE, 6);
@@ -82,7 +80,7 @@ public class TextureFix implements Listener {
             ignore.add(Material.SHIELD);
             ignore.add(Material.ELYTRA);
         }
-        
+
         //Деревянные инструменты
         ignore.addAll(Arrays.asList(Material.WOOD_SPADE, Material.WOOD_PICKAXE, Material.WOOD_AXE, Material.WOOD_SWORD, Material.WOOD_HOE));
         //Золотые инструменты
@@ -99,29 +97,8 @@ public class TextureFix implements Listener {
         ignore.addAll(Arrays.asList(Material.GOLD_BOOTS, Material.GOLD_CHESTPLATE, Material.GOLD_HELMET, Material.GOLD_LEGGINGS));
         ignore.addAll(Arrays.asList(Material.DIAMOND_BOOTS, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_HELMET, Material.DIAMOND_LEGGINGS));
         ignore.addAll(Arrays.asList(Material.CHAINMAIL_BOOTS, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_HELMET, Material.CHAINMAIL_LEGGINGS));
-        
-        initArtMapApi();
     }
-    
-    private boolean useArtMap = false;
-    private void initArtMapApi() {
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("ArtMap");
-        if (plugin != null && plugin.isEnabled()) {
-            useArtMap = true;
-        }
-    }
-    
-    private boolean isArtMapItem(ItemStack stack) {
-        if (useArtMap) {
-            for (ArtMaterial art : ArtMaterial.values()) {
-                if (art.isValidMaterial(stack)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    
+
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onHold(PlayerItemHeldEvent e) {
         ItemStack it = e.getPlayer().getInventory().getItem(e.getNewSlot());
@@ -131,7 +108,7 @@ public class TextureFix implements Listener {
             e.getPlayer().updateInventory();
         }
     }
-    
+
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onInteract(PlayerInteractEvent e) {
         ItemStack it = e.getItem();
@@ -141,7 +118,7 @@ public class TextureFix implements Listener {
             e.getPlayer().updateInventory();
         }
     }
-    
+
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onClick(InventoryClickEvent e) {
         ItemStack it = e.getCurrentItem();
@@ -151,7 +128,7 @@ public class TextureFix implements Listener {
             ((Player)e.getWhoClicked()).updateInventory();
         }
     }
-    
+
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onPickup(PlayerPickupItemEvent e) {
         ItemStack it = e.getItem().getItemStack();
@@ -162,7 +139,7 @@ public class TextureFix implements Listener {
     }
 
     private boolean isInvalide(ItemStack it) {
-        if (it != null && it.getType()!=Material.AIR && it.getDurability() != 0 && !isArtMapItem(it)) {
+        if (it != null && it.getType()!=Material.AIR && it.getDurability() != 0 && !plugin.isArtMapItem(it)) {
             if (limit.containsKey(it.getType())) {
                 return (it.getDurability() < 0 || it.getDurability() > limit.get(it.getType()));
             }

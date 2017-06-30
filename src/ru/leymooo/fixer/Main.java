@@ -1,7 +1,9 @@
 package ru.leymooo.fixer;
 
 import java.io.File;
+import java.util.HashSet;
 
+import me.Fupery.ArtMap.Recipe.ArtMaterial;
 import me.catcoder.updatechecker.PluginUpdater;
 import me.catcoder.updatechecker.UpdaterException;
 import me.catcoder.updatechecker.UpdaterResult;
@@ -14,12 +16,16 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.injector.packet.PacketRegistry;
 import com.elmakers.mine.bukkit.api.magic.MagicAPI;
+import com.google.common.collect.Sets;
 
 public class Main extends JavaPlugin {
 
+    private boolean useArtMap;
     private MagicAPI mapi;
     private ItemChecker checker;
     private ProtocolManager manager;
@@ -35,12 +41,13 @@ public class Main extends JavaPlugin {
         PluginManager pmanager = Bukkit.getPluginManager();
         version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
         mapi = getMagicAPI();
+        useArtMap = initArtMapApi();
         checker = new ItemChecker(this);
         manager = ProtocolLibrary.getProtocolManager();
         manager.addPacketListener(new NBTListener(this, version));
-        manager.addPacketListener(new PPSListener(this));
+        manager.addPacketListener(new PPSListener(this, getSupportedPackets()));
         pmanager.registerEvents(new NBTBukkitListener(this), this);
-        pmanager.registerEvents(new TextureFix(version), this);
+        pmanager.registerEvents(new TextureFix(version, this), this);
         if (getConfig().getBoolean("check-update")) checkUpdate();
         Bukkit.getConsoleSender().sendMessage("§b[ItemFixer] §aenabled");
     }
@@ -79,6 +86,14 @@ public class Main extends JavaPlugin {
         }
     }
 
+    private HashSet<PacketType> getSupportedPackets() {
+        HashSet<PacketType> allSupportedPackets = Sets.newHashSet();
+        for (PacketType type : PacketType.Play.Client.getInstance()) {
+            if (PacketRegistry.isSupported(type)) allSupportedPackets.add(type);
+        }
+        return allSupportedPackets;
+    }
+
     private MagicAPI getMagicAPI() {
         Plugin magicPlugin = Bukkit.getPluginManager().getPlugin("Magic");
         if (magicPlugin == null || !magicPlugin.isEnabled() || !(magicPlugin instanceof MagicAPI)) {
@@ -91,6 +106,21 @@ public class Main extends JavaPlugin {
         return version.startsWith("v1_11_R") || version.startsWith("v1_12_R") || version.startsWith("v1_13_R");
     }
 
+    private boolean initArtMapApi() {
+        Plugin plugin = Bukkit.getPluginManager().getPlugin("ArtMap");
+        return plugin != null && plugin.isEnabled();
+    }
+
+    public boolean isArtMapItem(ItemStack stack) {
+        if (useArtMap) {
+            for (ArtMaterial art : ArtMaterial.values()) {
+                if (art.isValidMaterial(stack)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     private void checkUpdate() {
         new Thread(()-> {
             try {

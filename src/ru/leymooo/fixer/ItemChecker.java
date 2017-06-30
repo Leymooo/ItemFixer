@@ -90,9 +90,9 @@ public class ItemChecker {
                         }
                     }
                 }
+                tag.remove("SkullOwner");
+                return true;
             }
-            tag.remove("SkullOwner");
-            return true;
         }
         return false;
     }
@@ -103,15 +103,14 @@ public class ItemChecker {
             final ItemMeta meta = stack.getItemMeta();
             for (Map.Entry<Enchantment, Integer> ench : meta.getEnchants().entrySet()) {
                 Enchantment Enchant = ench.getKey();
-                if (removeInvalidEnch && !Enchant.canEnchantItem(stack) ) {
+                String perm = "itemfixer.allow."+stack.getType().toString()+"."+Enchant.getName()+"."+ench.getValue();
+                if (removeInvalidEnch && !Enchant.canEnchantItem(stack) && !p.hasPermission(perm) ) {
                     meta.removeEnchant(Enchant);
                     cheat = true;
                 }
-                if (ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) {
-                    if (!p.hasPermission("itemfixer.allow."+stack.getType().toString()+"."+Enchant.getName()+"."+ench.getValue())) {
-                        meta.removeEnchant(Enchant);
-                        cheat = true;
-                    }
+                if ((ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) && !p.hasPermission(perm)) {
+                    meta.removeEnchant(Enchant);
+                    cheat = true;
                 }
             }
             if (cheat) stack.setItemMeta(meta);

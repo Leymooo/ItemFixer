@@ -1,5 +1,6 @@
 package ru.leymooo.fixer;
 
+import java.util.HashSet;
 import java.util.WeakHashMap;
 
 import org.bukkit.Bukkit;
@@ -16,11 +17,11 @@ public class PPSListener extends PacketAdapter {
 
     public static WeakHashMap<Player, PPSPlayer> ppsPlayerByPlayer;
 
-    public PPSListener(Main plugin) {
-        super(plugin, ListenerPriority.NORMAL, PacketType.Play.Client.getInstance());
+    public PPSListener(Main plugin, HashSet<PacketType> types) {
+        super(plugin, ListenerPriority.NORMAL, types);
         ppsPlayerByPlayer = new WeakHashMap<Player, PPSPlayer>();
     }
-
+ 
     @Override
     public void onPacketReceiving(PacketEvent event) {
         if (event.isCancelled()) return;
