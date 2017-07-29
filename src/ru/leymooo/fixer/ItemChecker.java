@@ -69,18 +69,18 @@ public class ItemChecker {
                                     }
                                     if (decoded.contains("textures") && decoded.contains("SKIN")) {
                                         if (decoded.contains("url")) {
-                                            String Url = null;
+                                            String headUrl = null;
                                             try {
-                                                Url = decoded.split("url\":")[1].replace("}", "").replace("\"", "");
+                                                headUrl = decoded.split("url\":")[1].replace("}", "").replace("\"", "");
                                             } catch (ArrayIndexOutOfBoundsException e) {
                                                 tag.remove("SkullOwner");
                                                 return true;
                                             }
-                                            if (Url == null || Url.isEmpty() || Url.trim().length() == 0) {
+                                            if (headUrl == null || headUrl.isEmpty() || headUrl.trim().length() == 0) {
                                                 tag.remove("SkullOwner");
                                                 return true;
                                             }
-                                            if (Url.startsWith("http://textures.minecraft.net/texture/") || Url.startsWith("https://textures.minecraft.net/texture/")) {
+                                            if (headUrl.startsWith("http://textures.minecraft.net/texture/") || headUrl.startsWith("https://textures.minecraft.net/texture/")) {
                                                 return false;
                                             }
                                         }

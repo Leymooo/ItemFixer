@@ -6,6 +6,7 @@ import java.util.WeakHashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import ru.leymooo.fixer.utils.PlayerUtils;
 import ru.leymooo.fixer.utils.ppsutils.PPSPlayer;
 
 import com.comphenix.protocol.PacketType;
@@ -25,8 +26,8 @@ public class PPSListener extends PacketAdapter {
     @Override
     public void onPacketReceiving(PacketEvent event) {
         if (event.isCancelled()) return;
-        Player p = Bukkit.getPlayerExact(event.getPlayer().getName());
-        if (p == null || !p.isOnline()) return;
+        Player p = PlayerUtils.getPlayerFromEvent(event);
+        if (p == null) return;
         if (ppsPlayerByPlayer.containsKey(p)) {
             if (ppsPlayerByPlayer.get(p).handlePPS()) {
                 event.setCancelled(true);

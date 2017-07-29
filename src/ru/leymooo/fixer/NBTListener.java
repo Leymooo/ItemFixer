@@ -9,6 +9,8 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import ru.leymooo.fixer.utils.PlayerUtils;
+
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
@@ -28,8 +30,8 @@ public class NBTListener extends PacketAdapter {
     @Override
     public void onPacketReceiving(PacketEvent event) {
         if (event.isCancelled()) return;
-        Player p = Bukkit.getPlayerExact(event.getPlayer().getName());
-        if (p == null || !p.isOnline()) return;
+        Player p = PlayerUtils.getPlayerFromEvent(event);
+        if (p == null) return;
         if (this.needCancel(p)) {
             event.setCancelled(true);
             return;
@@ -89,6 +91,6 @@ public class NBTListener extends PacketAdapter {
     }
     
     private boolean needCancel(Player p) {
-        return cancel.containsKey(p) && (1200 - (System.currentTimeMillis() - cancel.get(p))) > 0;
+        return cancel.containsKey(p) && (1500 - (System.currentTimeMillis() - cancel.get(p))) > 0;
     }
 }

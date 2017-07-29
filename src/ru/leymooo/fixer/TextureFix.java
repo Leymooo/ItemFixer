@@ -141,7 +141,7 @@ public class TextureFix implements Listener {
     private boolean isInvalide(ItemStack it) {
         if (it != null && it.getType()!=Material.AIR && it.getDurability() != 0 && !plugin.isArtMapItem(it)) {
             if (limit.containsKey(it.getType())) {
-                return (it.getDurability() < 0 || it.getDurability() > limit.get(it.getType()));
+                return (it.getDurability() < 0 || (it.getDurability() > limit.get(it.getType())));
             }
             return !ignore.contains(it.getType());
         }
