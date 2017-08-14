@@ -144,8 +144,7 @@ public class ItemChecker {
                     || (!ignoreNbt.contains("run_command") && tagS.contains("run_command")))) {
                 tag.getKeys().clear();
                 cheat = true;
-            } else if (mat == Material.MONSTER_EGG && !ignoreNbt.contains("EntityTag") && (tag.containsKey("EntityTag") && tag.getCompound("EntityTag").getKeys().size()>=2)) {
-                tag.put("EntityTag",getClearEntityTag(tag.getCompound("EntityTag")));
+            } else if (mat == Material.MONSTER_EGG && !ignoreNbt.contains("EntityTag") && tag.containsKey("EntityTag") && fixEgg(tag)) {
                 cheat = true;
             } else if (mat == Material.ARMOR_STAND && !ignoreNbt.contains("EntityTag") && tag.containsKey("EntityTag")) {
                 tag.remove("EntityTag");
@@ -165,7 +164,7 @@ public class ItemChecker {
         BlockStateMeta meta = (BlockStateMeta) stack.getItemMeta();
         ShulkerBox box = (ShulkerBox) meta.getBlockState();
         for (ItemStack is : box.getInventory().getContents()) {
-            if (isHackedItem(is, p)) {
+            if (isShulkerBox(is) || isHackedItem(is, p)) {
                 box.getInventory().clear();
                 meta.setBlockState(box);
                 stack.setItemMeta(meta);
@@ -175,6 +174,7 @@ public class ItemChecker {
     }
 
     private boolean isShulkerBox(ItemStack stack) {
+        if (stack == null || stack.getType() == Material.AIR) return false;
         if (!plugin.isUnsupportedVersion()) return false;
         if (!stack.hasItemMeta()) return false;
         if (!(stack.getItemMeta() instanceof BlockStateMeta)) return false;
@@ -205,10 +205,22 @@ public class ItemChecker {
         return mat == Material.WRITTEN_BOOK ? (tagL >= 22000) : (tagL >= 13000);
     }
 
-    private NbtCompound getClearEntityTag(NbtCompound enttag) {
-        String id = enttag.getString("id");
-        enttag.getKeys().clear();
-        enttag.put("id",id);
-        return enttag;
+    private boolean fixEgg(NbtCompound tag) {
+        NbtCompound enttag = tag.getCompound("EntityTag");
+        int size = enttag.getKeys().size();
+        if (size >= 2 ) {
+            Object id = enttag.getObject("id");
+            Object color = enttag.getObject("Color");
+            enttag.getKeys().clear();
+            if (id != null && id instanceof String) {
+                enttag.put("id", (String) id);
+            }
+            if (color != null && color instanceof Byte) {
+                enttag.put("Color", (byte) color);
+            }
+            tag.put("EntityTag", enttag);
+            return color==null ? true : size >= 3;
+        }
+        return false;
     }
 }

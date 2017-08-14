@@ -16,6 +16,7 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 
+@SuppressWarnings("deprecation")
 public class TextureFix implements Listener {
 
     private HashMap<Material,Integer> limit = new HashMap<Material, Integer>();
@@ -130,7 +131,7 @@ public class TextureFix implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
-    public void onPickup(PlayerPickupItemEvent e) {
+    public void onPickup(PlayerPickupItemEvent e) { //Deprecated
         ItemStack it = e.getItem().getItemStack();
         if (isInvalide(it)) {
             e.setCancelled(true);
