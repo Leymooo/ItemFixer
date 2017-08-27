@@ -2,15 +2,19 @@ package ru.leymooo.fixer;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import ru.leymooo.fixer.utils.MiniNbtFactory;
@@ -153,6 +157,8 @@ public class ItemChecker {
                 if (isCrashSkull(tag)) {
                     cheat = true;
                 }
+            } else if (mat == Material.FIREWORK && !ignoreNbt.contains("Explosions") && checkFireWork(stack)) {
+                cheat = true;
             }
         } catch (Exception e) {
         }
@@ -192,6 +198,26 @@ public class ItemChecker {
         }
         return checkEnchants(stack, p);
     }
+
+    public boolean checkFireWork(ItemStack stack) {
+        boolean changed = false;
+        FireworkMeta meta = (FireworkMeta) stack.getItemMeta();
+        if (meta.getPower() > 3) {
+            meta.setPower(3);
+            changed = true;
+        }
+        if (meta.getEffectsSize() > 8) {
+            List<FireworkEffect> list = meta.getEffects().stream().limit(8).collect(Collectors.toList());
+            meta.clearEffects();
+            meta.addEffects(list);
+            changed = true;
+        }
+        if (changed) {
+            stack.setItemMeta(meta);
+        }
+        return changed;
+    }
+
 
     private boolean isCrashItem(ItemStack stack, NbtCompound tag, Material mat) {
         if (stack.getAmount() <1 || stack.getAmount() > 64 || tag.getKeys().size() > 20) {

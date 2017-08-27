@@ -22,6 +22,7 @@ ignore-worlds:
 #ClickEvent
 #BlockEntityTag
 #EntityTag
+#Explosions
 ignored-tags:
   - tag1
   - tag2
