@@ -1,5 +1,6 @@
 package ru.leymooo.fixer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -10,9 +11,11 @@ import org.apache.commons.codec.binary.Base64;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
 import org.bukkit.block.ShulkerBox;
+import org.bukkit.block.banner.Pattern;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -141,7 +144,7 @@ public class ItemChecker {
                     cheat = true;
                 }
             }
-            if (tiles.contains(mat) && !ignoreNbt.contains("BlockEntityTag") &&  tag.containsKey("BlockEntityTag")) {
+            if (tag.containsKey("BlockEntityTag") && !isShulkerBox(stack) && mat != Material.BANNER && !ignoreNbt.contains("BlockEntityTag") ) {
                 tag.remove("BlockEntityTag");
                 cheat = true;
             } else if (mat == Material.WRITTEN_BOOK && ((!ignoreNbt.contains("ClickEvent") && tagS.contains("ClickEvent"))
@@ -158,6 +161,8 @@ public class ItemChecker {
                     cheat = true;
                 }
             } else if (mat == Material.FIREWORK && !ignoreNbt.contains("Explosions") && checkFireWork(stack)) {
+                cheat = true;
+            } else if (mat == Material.BANNER && checkBanner(stack)) {
                 cheat = true;
             }
         } catch (Exception e) {
@@ -199,6 +204,27 @@ public class ItemChecker {
         return checkEnchants(stack, p);
     }
 
+    private boolean checkBanner(ItemStack stack) {
+        ItemMeta meta = stack.getItemMeta();
+        boolean cheat = false;
+        if (meta instanceof BannerMeta) {
+            BannerMeta bmeta = (BannerMeta) meta;
+            ArrayList<Pattern> patterns = new ArrayList<Pattern>();
+            for (Pattern pattern : bmeta.getPatterns()) {
+                if (pattern.getPattern() == null) {
+                    cheat = true;
+                    continue;
+                }
+                patterns.add(pattern);
+            }
+            if (cheat) {
+                bmeta.setPatterns(patterns);
+                stack.setItemMeta(bmeta);
+            }
+        }
+        return cheat;
+    }
+
     public boolean checkFireWork(ItemStack stack) {
         boolean changed = false;
         FireworkMeta meta = (FireworkMeta) stack.getItemMeta();
@@ -217,7 +243,6 @@ public class ItemChecker {
         }
         return changed;
     }
-
 
     private boolean isCrashItem(ItemStack stack, NbtCompound tag, Material mat) {
         if (stack.getAmount() <1 || stack.getAmount() > 64 || tag.getKeys().size() > 20) {

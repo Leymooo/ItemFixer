@@ -8,7 +8,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 
 import com.gmail.filoghost.chestcommands.internal.MenuInventoryHolder;
 
@@ -49,9 +51,18 @@ public class NBTBukkitListener implements Listener {
         }
     }
     
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false) 
+    public void onSlotChange(PlayerItemHeldEvent event) {
+        Player p = event.getPlayer();
+        ItemStack stack = p.getInventory().getItem(event.getNewSlot());
+        if (plugin.checkItem(stack, p)) {
+            event.setCancelled(true);
+            p.updateInventory();
+        }
+    }
+    
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        NBTListener.cancel.remove(event.getPlayer());
-        PPSListener.ppsPlayerByPlayer.remove(event.getPlayer());
+        NBTListener.cancel.invalidate(event.getPlayer());
     }
 }

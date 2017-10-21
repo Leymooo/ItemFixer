@@ -26,7 +26,3 @@ ignore-worlds:
 ignored-tags:
   - tag1
   - tag2
-#Clients by default send around 20-90 packets per second.
-# 0 for disable
-max-pps: 300
-max-pps-kick-msg: "&cYou are sending too many packets!"

@@ -1,7 +1,6 @@
 package ru.leymooo.fixer;
 
 import java.io.File;
-import java.util.HashSet;
 
 import me.Fupery.ArtMap.Recipe.ArtMaterial;
 import me.catcoder.updatechecker.PluginUpdater;
@@ -16,12 +15,9 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.injector.packet.PacketRegistry;
 import com.elmakers.mine.bukkit.api.magic.MagicAPI;
-import com.google.common.collect.Sets;
 
 public class Main extends JavaPlugin {
 
@@ -31,13 +27,11 @@ public class Main extends JavaPlugin {
     private ProtocolManager manager;
     public String version;
     private final PluginUpdater updater = new PluginUpdater(this, "Dimatert9", "ItemFixer");
-    public static int maxPPS = 999;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         checkNewConfig();
-        maxPPS = getConfig().getInt("max-pps");
         PluginManager pmanager = Bukkit.getPluginManager();
         version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
         mapi = getMagicAPI();
@@ -45,7 +39,6 @@ public class Main extends JavaPlugin {
         checker = new ItemChecker(this);
         manager = ProtocolLibrary.getProtocolManager();
         manager.addPacketListener(new NBTListener(this, version));
-        manager.addPacketListener(new PPSListener(this, getSupportedPackets()));
         pmanager.registerEvents(new NBTBukkitListener(this), this);
         pmanager.registerEvents(new TextureFix(version, this), this);
         if (getConfig().getBoolean("check-update")) checkUpdate();
@@ -56,10 +49,8 @@ public class Main extends JavaPlugin {
     public void onDisable() {
         HandlerList.unregisterAll(this);
         manager.removePacketListeners(this);
-        NBTListener.cancel.clear();
+        NBTListener.cancel.invalidateAll();
         NBTListener.cancel = null;
-        PPSListener.ppsPlayerByPlayer.clear();
-        PPSListener.ppsPlayerByPlayer = null;
         mapi = null;
         checker = null;
         manager = null;
@@ -79,20 +70,12 @@ public class Main extends JavaPlugin {
             config.delete();
             saveDefaultConfig();
         }
-        if (!getConfig().isSet("max-pps")) {
-            getConfig().set("max-pps", 300);
-            getConfig().set("max-pps-kick-msg", "&cYou are sending too many packets!");
+        if (getConfig().isSet("max-pps")) {
+            getConfig().set("max-pps", null);
+            getConfig().set("max-pps-kick-msg", null);
             saveConfig();
         }
-    }
-
-    private HashSet<PacketType> getSupportedPackets() {
-        HashSet<PacketType> allSupportedPackets = Sets.newHashSet();
-        for (PacketType type : PacketType.Play.Client.getInstance()) {
-            if (PacketRegistry.isSupported(type)) allSupportedPackets.add(type);
-        }
-        return allSupportedPackets;
-    }
+    }   
 
     private MagicAPI getMagicAPI() {
         Plugin magicPlugin = Bukkit.getPluginManager().getPlugin("Magic");
