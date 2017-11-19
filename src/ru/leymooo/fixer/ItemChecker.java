@@ -144,7 +144,7 @@ public class ItemChecker {
                     cheat = true;
                 }
             }
-            if (tag.containsKey("BlockEntityTag") && !isShulkerBox(stack) && mat != Material.BANNER && !ignoreNbt.contains("BlockEntityTag") ) {
+            if (tag.containsKey("BlockEntityTag") && !isShulkerBox(stack) && !needIgnore(stack) && !ignoreNbt.contains("BlockEntityTag") ) {
                 tag.remove("BlockEntityTag");
                 cheat = true;
             } else if (mat == Material.WRITTEN_BOOK && ((!ignoreNbt.contains("ClickEvent") && tagS.contains("ClickEvent"))
@@ -168,6 +168,11 @@ public class ItemChecker {
         } catch (Exception e) {
         }
         return cheat;
+    }
+    
+    private boolean needIgnore(ItemStack stack) {
+        Material m = stack.getType();
+        return (m == Material.BANNER || (!plugin.version.startsWith("v1_8_R") && (m == Material.SHIELD)));
     }
 
     private void checkShulkerBox(ItemStack stack, Player p) {
