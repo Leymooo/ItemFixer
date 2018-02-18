@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
+import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
 import org.bukkit.block.ShulkerBox;
@@ -174,7 +175,8 @@ public class ItemChecker {
                 cheat = true;
             } else if (mat == Material.BANNER && checkBanner(stack)) {
                 cheat = true;
-            } else if (isPotion(stack) && !ignoreNbt.contains("CustomPotionEffects") && tag.containsKey("CustomPotionEffects") && checkPotion(stack, p)) {
+            } else if (isPotion(stack) && !ignoreNbt.contains("CustomPotionEffects") && tag.containsKey("CustomPotionEffects")
+                    && (checkPotion(stack, p) || checkCustomColor(tag.getCompound("CustomPotionEffects")))) {
                 cheat = true;
             }
         } catch (Exception e) {
@@ -208,6 +210,19 @@ public class ItemChecker {
             clearData(stack);
             return false;
         }
+    }
+    
+    private boolean checkCustomColor(NbtCompound tag) {
+        if (tag.containsKey("CustomPotionColor")) {
+            int color = tag.getInteger("CustomPotionColor");
+            try {
+                Color.fromBGR(color);
+            } catch (IllegalArgumentException e) {
+                tag.remove("CustomPotionColor");
+                return true;
+            }
+        }
+        return false;
     }
     
     private boolean checkPotion(ItemStack stack, Player p) {
