@@ -19,12 +19,14 @@ import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import ru.leymooo.fixer.utils.MiniNbtFactory;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
 
 import com.comphenix.protocol.wrappers.nbt.NbtBase;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtList;
+
+import ru.leymooo.fixer.utils.MiniNbtFactory;
 
 public class ItemChecker {
 
@@ -39,7 +41,7 @@ public class ItemChecker {
     public ItemChecker(Main main) {
         this.plugin = main;
         ignoreNbt.addAll(plugin.getConfig().getStringList("ignored-tags"));
-        nbt.addAll(Arrays.asList("ActiveEffects", "Command", "CustomName", "AttributeModifiers", "Unbreakable", "CustomPotionEffects"));
+        nbt.addAll(Arrays.asList("ActiveEffects", "Command", "CustomName", "AttributeModifiers", "Unbreakable"));
         nbt.removeAll(ignoreNbt);
         tiles.addAll(Arrays.asList(
                 Material.FURNACE, Material.CHEST, Material.TRAPPED_CHEST, Material.DROPPER, Material.DISPENSER, Material.COMMAND_MINECART, Material.HOPPER_MINECART,
@@ -108,15 +110,23 @@ public class ItemChecker {
         boolean cheat = false;
         if (checkench && !p.hasPermission("itemfixer.bypass.enchant") && stack.hasItemMeta() && stack.getItemMeta().hasEnchants()) {
             final ItemMeta meta = stack.getItemMeta();
-            for (Map.Entry<Enchantment, Integer> ench : meta.getEnchants().entrySet()) {
-                Enchantment Enchant = ench.getKey();
-                String perm = "itemfixer.allow."+stack.getType().toString()+"."+Enchant.getName()+"."+ench.getValue();
-                if (removeInvalidEnch && !Enchant.canEnchantItem(stack) && !p.hasPermission(perm) ) {
-                    meta.removeEnchant(Enchant);
+            Map<Enchantment, Integer> enchantments = null;
+            try {
+                enchantments = meta.getEnchants();
+            } catch (Exception e) {
+                clearData(stack);
+                p.updateInventory();
+                return true;
+            }
+            for (Map.Entry<Enchantment, Integer> ench : enchantments.entrySet()) {
+                Enchantment enchant = ench.getKey();
+                String perm = "itemfixer.allow."+stack.getType().toString()+"."+enchant.getName()+"."+ench.getValue();
+                if (removeInvalidEnch && !enchant.canEnchantItem(stack) && !p.hasPermission(perm) ) {
+                    meta.removeEnchant(enchant);
                     cheat = true;
                 }
-                if ((ench.getValue() > Enchant.getMaxLevel() || ench.getValue() < 0) && !p.hasPermission(perm)) {
-                    meta.removeEnchant(Enchant);
+                if ((ench.getValue() > enchant.getMaxLevel() || ench.getValue() < 0) && !p.hasPermission(perm)) {
+                    meta.removeEnchant(enchant);
                     cheat = true;
                 }
             }
@@ -144,7 +154,7 @@ public class ItemChecker {
                     cheat = true;
                 }
             }
-            if (tag.containsKey("BlockEntityTag") && !isShulkerBox(stack) && !needIgnore(stack) && !ignoreNbt.contains("BlockEntityTag") ) {
+            if (tag.containsKey("BlockEntityTag") && !isShulkerBox(stack, stack) && !needIgnore(stack) && !ignoreNbt.contains("BlockEntityTag") ) {
                 tag.remove("BlockEntityTag");
                 cheat = true;
             } else if (mat == Material.WRITTEN_BOOK && ((!ignoreNbt.contains("ClickEvent") && tagS.contains("ClickEvent"))
@@ -164,6 +174,8 @@ public class ItemChecker {
                 cheat = true;
             } else if (mat == Material.BANNER && checkBanner(stack)) {
                 cheat = true;
+            } else if (isPotion(stack) && !ignoreNbt.contains("CustomPotionEffects") && tag.containsKey("CustomPotionEffects") && checkPotion(stack, p)) {
+                cheat = true;
             }
         } catch (Exception e) {
         }
@@ -176,11 +188,11 @@ public class ItemChecker {
     }
 
     private void checkShulkerBox(ItemStack stack, Player p) {
-        if (!isShulkerBox(stack)) return;
+        if (!isShulkerBox(stack, stack)) return;
         BlockStateMeta meta = (BlockStateMeta) stack.getItemMeta();
         ShulkerBox box = (ShulkerBox) meta.getBlockState();
         for (ItemStack is : box.getInventory().getContents()) {
-            if (isShulkerBox(is) || isHackedItem(is, p)) {
+            if (isShulkerBox(is, stack) || isHackedItem(is, p)) {
                 box.getInventory().clear();
                 meta.setBlockState(box);
                 stack.setItemMeta(meta);
@@ -188,12 +200,44 @@ public class ItemChecker {
             }
         }
     }
+    
+    private boolean isPotion(ItemStack stack) {
+        try {
+            return stack.hasItemMeta() && stack.getItemMeta() instanceof PotionMeta;
+        } catch (IllegalArgumentException e) {
+            clearData(stack);
+            return false;
+        }
+    }
+    
+    private boolean checkPotion(ItemStack stack, Player p) {
+        boolean cheat = false;
+        if (!p.hasPermission("itemfixer.bypass.potion")) {
+            PotionMeta meta = (PotionMeta) stack.getItemMeta();
+            for (PotionEffect ef : meta.getCustomEffects()) {
+                String perm = "itemfixer.allow.".concat(ef.getType().toString()).concat(".").concat(String.valueOf(ef.getAmplifier()+1));
+                if (!p.hasPermission(perm)) {
+                    meta.removeCustomEffect(ef.getType());
+                    cheat = true;
+                }
+            }
+            if (cheat) {
+                stack.setItemMeta(meta);
+            }
+        }
+        return cheat;
+    }
 
-    private boolean isShulkerBox(ItemStack stack) {
+    private boolean isShulkerBox(ItemStack stack, ItemStack rootStack) {
         if (stack == null || stack.getType() == Material.AIR) return false;
         if (!plugin.isUnsupportedVersion()) return false;
         if (!stack.hasItemMeta()) return false;
-        if (!(stack.getItemMeta() instanceof BlockStateMeta)) return false;
+        try {
+            if (!(stack.getItemMeta() instanceof BlockStateMeta)) return false;
+        } catch (IllegalArgumentException e) {
+            clearData(rootStack); //Уууух. Костылики
+            return false;
+        }
         BlockStateMeta meta = (BlockStateMeta) stack.getItemMeta();
         return meta.getBlockState() instanceof ShulkerBox;
     }
@@ -257,7 +301,7 @@ public class ItemChecker {
         if ((mat == Material.NAME_TAG || tiles.contains(mat)) && tagL > 600) {
             return true;
         }
-        if (isShulkerBox(stack)) return false;
+        if (isShulkerBox(stack, stack)) return false;
         return mat == Material.WRITTEN_BOOK ? (tagL >= 22000) : (tagL >= 13000);
     }
 
@@ -278,5 +322,11 @@ public class ItemChecker {
             return color==null ? true : size >= 3;
         }
         return false;
+    }
+    
+    private void clearData(ItemStack stack) {
+        NbtCompound tag = (NbtCompound) MiniNbtFactory.fromItemTag(stack);
+        if (tag == null) return;
+        tag.getKeys().clear();
     }
 }

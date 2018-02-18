@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -60,7 +61,12 @@ public class NBTBukkitListener implements Listener {
             p.updateInventory();
         }
     }
-    
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        for (ItemStack stack : event.getPlayer().getInventory().getContents()) {
+            plugin.checkItem(stack, event.getPlayer());
+        }
+    }
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         NBTListener.cancel.invalidate(event.getPlayer());
