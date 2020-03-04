@@ -15,6 +15,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
+import ru.leymooo.fixer.utils.VersionUtils;
 
 @SuppressWarnings("deprecation")
 public class TextureFix implements Listener {
@@ -23,7 +24,7 @@ public class TextureFix implements Listener {
     private HashSet<Material> ignore = new HashSet<Material>();
     private Main plugin;
 
-    public TextureFix(String version, Main main) {
+    public TextureFix(Main main) {
         this.plugin = main;
         //Вроде все предменты что имеют SubId
         //Material, MaxSubId
@@ -65,14 +66,14 @@ public class TextureFix implements Listener {
         limit.put(Material.GOLDEN_APPLE, 1);
         limit.put(Material.BANNER, 15);
         limit.put(Material.ANVIL, 2);
-        if (version.startsWith("v1_12_R")) {
+        if (VersionUtils.isVersion(12)) {
             limit.put(Material.CONCRETE, 15);
             limit.put(Material.CONCRETE_POWDER, 15);
             limit.put(Material.BED, 15);
         }
         //Предметы с прочностью.
         ignore.addAll(Arrays.asList(Material.MAP, Material.EMPTY_MAP, Material.CARROT_STICK, Material.BOW, Material.FISHING_ROD, Material.FLINT_AND_STEEL, Material.SHEARS));
-        if (version.startsWith("v1_8_R")) {
+        if (VersionUtils.getMajorVersion() == 8) {
             ignore.add(Material.MONSTER_EGG);
             ignore.add(Material.POTION);
             limit.put(Material.SKULL_ITEM, 4);
@@ -140,7 +141,7 @@ public class TextureFix implements Listener {
     }
 
     private boolean isInvalide(ItemStack it) {
-        if (it != null && it.getType()!=Material.AIR && it.getDurability() != 0 && !plugin.isArtMapItem(it)) {
+        if (it != null && it.getType()!=Material.AIR && it.getDurability() != 0) {
             if (limit.containsKey(it.getType())) {
                 return (it.getDurability() < 0 || (it.getDurability() > limit.get(it.getType())));
             }

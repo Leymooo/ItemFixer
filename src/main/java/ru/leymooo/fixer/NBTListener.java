@@ -24,7 +24,7 @@ public class NBTListener extends PacketAdapter {
     
     public static Cache<Player, Object> cancel;
     
-    public NBTListener(Main plugin, String version) {
+    public NBTListener(Main plugin) {
         super(plugin, ListenerPriority.HIGHEST, PacketType.Play.Client.SET_CREATIVE_SLOT, PacketType.Play.Client.CUSTOM_PAYLOAD);
         cancel = CacheBuilder.newBuilder()
                 .concurrencyLevel( 2 ).initialCapacity( 20 )
@@ -42,7 +42,7 @@ public class NBTListener extends PacketAdapter {
         }
         if (event.getPacketType() == PacketType.Play.Client.SET_CREATIVE_SLOT && p.getGameMode() == GameMode.CREATIVE) {
             this.proccessSetCreativeSlot(event, p);
-        } else if (event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD && !((Main) getPlugin()).isUnsupportedVersion() && !p.hasPermission("itemfixer.bypass.packet")) {
+        } else if (event.getPacketType() == PacketType.Play.Client.CUSTOM_PAYLOAD && !((Main) getPlugin()).isSupportedVersion() && !p.hasPermission("itemfixer.bypass.packet")) {
             this.proccessCustomPayload(event, p);
         }
     }

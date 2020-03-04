@@ -2,7 +2,6 @@ package ru.leymooo.fixer;
 
 import java.io.File;
 
-import me.Fupery.ArtMap.Recipe.ArtMaterial;
 import me.catcoder.updatechecker.PluginUpdater;
 import me.catcoder.updatechecker.UpdaterException;
 import me.catcoder.updatechecker.UpdaterResult;
@@ -18,6 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.elmakers.mine.bukkit.api.magic.MagicAPI;
+import ru.leymooo.fixer.utils.VersionUtils;
 
 public class Main extends JavaPlugin {
 
@@ -25,7 +25,6 @@ public class Main extends JavaPlugin {
     private MagicAPI mapi;
     private ItemChecker checker;
     private ProtocolManager manager;
-    public String version;
     private final PluginUpdater updater = new PluginUpdater(this, "Dimatert9", "ItemFixer");
 
     @Override
@@ -33,14 +32,13 @@ public class Main extends JavaPlugin {
         saveDefaultConfig();
         checkNewConfig();
         PluginManager pmanager = Bukkit.getPluginManager();
-        version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
         mapi = getMagicAPI();
         useArtMap = initArtMapApi();
         checker = new ItemChecker(this);
         manager = ProtocolLibrary.getProtocolManager();
-        manager.addPacketListener(new NBTListener(this, version));
+        manager.addPacketListener(new NBTListener(this));
         pmanager.registerEvents(new NBTBukkitListener(this), this);
-        pmanager.registerEvents(new TextureFix(version, this), this);
+        pmanager.registerEvents(new TextureFix(this), this);
         if (getConfig().getBoolean("check-update")) checkUpdate();
         Bukkit.getConsoleSender().sendMessage("§b[ItemFixer] §aenabled");
     }
@@ -85,8 +83,8 @@ public class Main extends JavaPlugin {
         return (MagicAPI) magicPlugin;
     }
 
-    public boolean isUnsupportedVersion() {
-        return version.startsWith("v1_11_R") || version.startsWith("v1_12_R") || version.startsWith("v1_13_R");
+    public boolean isSupportedVersion() {
+        return !VersionUtils.isVersion(13);// now ItemFixer does not support 1.13+
     }
 
     private boolean initArtMapApi() {
@@ -94,16 +92,6 @@ public class Main extends JavaPlugin {
         return plugin != null && plugin.isEnabled();
     }
 
-    public boolean isArtMapItem(ItemStack stack) {
-        if (useArtMap) {
-            for (ArtMaterial art : ArtMaterial.values()) {
-                if (art.isValidMaterial(stack)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
     private void checkUpdate() {
         new Thread(()-> {
             try {
