@@ -3,6 +3,8 @@ package ru.leymooo.fixer;
 import com.comphenix.protocol.wrappers.nbt.NbtBase;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtList;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
@@ -21,180 +23,147 @@ import java.util.stream.Collectors;
 
 public class ItemChecker {
 
-    private Boolean removeInvalidEnch;
-    private Boolean checkench;
-    private HashSet<String> nbt = new HashSet<String>();
-    private HashSet<String> world = new HashSet<String>();
-    private HashSet<Material> tiles = new HashSet<Material>();
-    private HashSet<String> ignoreNbt = new HashSet<String>();
-    private Main plugin;
+    private final Gson gson = new Gson();
+    private final Set<String> nbt;
+    private final Set<String> world;
+    private final Set<Material> tiles;
+    private final Set<String> ignoreNbt;
+    private final Main plugin;
+    private boolean removeInvalidEnch;
+    private boolean checkench;
 
     public ItemChecker(Main main) {
         this.plugin = main;
-        ignoreNbt.addAll(plugin.getConfig().getStringList("ignored-tags"));
+        ignoreNbt = new HashSet<>(plugin.getConfig().getStringList("ignored-tags"));
+        nbt = new HashSet<>(Arrays.asList("ActiveEffects", "Command", "CustomName", "AttributeModifiers", "Unbreakable"));
+        nbt.removeAll(ignoreNbt);
         nbt.addAll(Arrays.asList("ActiveEffects", "Command", "CustomName", "AttributeModifiers", "Unbreakable"));
         nbt.removeAll(ignoreNbt);
-        tiles.addAll(Arrays.asList(Material.FURNACE, Material.CHEST, Material.TRAPPED_CHEST, Material.DROPPER, Material.DISPENSER,
-                Material.COMMAND_MINECART, Material.HOPPER_MINECART, Material.HOPPER, Material.BREWING_STAND_ITEM, Material.BEACON,
-                Material.SIGN, Material.MOB_SPAWNER, Material.NOTE_BLOCK, Material.COMMAND, Material.JUKEBOX));
-        for (String w : plugin.getConfig().getStringList("ignore-worlds")) {
-            world.add(w.toLowerCase());
-        }
+        tiles = EnumSet.copyOf(Arrays.asList(
+                Material.FURNACE, Material.CHEST, Material.TRAPPED_CHEST, Material.DROPPER, Material.DISPENSER, Material.COMMAND_MINECART, Material.HOPPER_MINECART,
+                Material.HOPPER, Material.BREWING_STAND_ITEM, Material.BEACON, Material.SIGN, Material.MOB_SPAWNER, Material.NOTE_BLOCK, Material.COMMAND, Material.JUKEBOX));
+
+        world = new HashSet<>(plugin.getConfig().getStringList("ignore-worlds"));
         checkench = plugin.getConfig().getBoolean("check-enchants");
         removeInvalidEnch = plugin.getConfig().getBoolean("remove-invalid-enchants");
     }
 
     @SuppressWarnings("rawtypes")
     public boolean isCrashSkull(NbtCompound tag) {
-        if (tag.containsKey("SkullOwner")) {
-            NbtCompound skullOwner = tag.getCompound("SkullOwner");
-            if (skullOwner.containsKey("Properties")) {
-                NbtCompound properties = skullOwner.getCompound("Properties");
-                if (properties.containsKey("textures")) {
-                    NbtList<NbtBase> textures = properties.getList("textures");
-                    for (NbtBase texture : textures.asCollection()) {
-                        if (texture instanceof NbtCompound) {
-                            if (((NbtCompound) texture).containsKey("Value")) {
-                                if (((NbtCompound) texture).getString("Value").trim().length() > 0) {
-                                    String decoded = null;
-                                    try {
-                                        decoded = new String(Base64.getDecoder().decode(((NbtCompound) texture).getString("Value")));
-                                    } catch (Exception e) {
-                                        try {
-                                            decoded =
-                                                    new String(Base64.getMimeDecoder().decode(((NbtCompound) texture).getString("Value")));
-                                        } catch (Exception e2) {
-                                            e2.printStackTrace();
-                                        }
-                                        if (decoded == null) {
-                                            e.printStackTrace();
-                                            tag.remove("SkullOwner");
-                                            return true;
-                                        }
-                                    }
-                                    if (decoded == null || decoded.isEmpty()) {
-                                        tag.remove("SkullOwner");
-                                        return true;
-                                    }
-                                    if (decoded.contains("textures") && decoded.contains("SKIN")) {
-                                        if (decoded.contains("url")) {
-                                            String headUrl = null;
-                                            boolean parsed = false;
-                                            try {
-                                                headUrl = decoded.split("url\":")[1].replace("}", "").replace("\"", "");
-                                            } catch (ArrayIndexOutOfBoundsException e) {
-                                                try {
-                                                    headUrl = decoded.split("url:")[1].replace("}", "").replace("\"", "");
-                                                    parsed = true;
-                                                } catch (ArrayIndexOutOfBoundsException e1) {
-                                                }
-                                                if (!parsed) {
-                                                    tag.remove("SkullOwner");
-                                                    return true;
-                                                }
-                                            }
-                                            if (headUrl == null || headUrl.isEmpty() || headUrl.trim().length() == 0) {
-                                                tag.remove("SkullOwner");
-                                                return true;
-                                            }
-                                            if (headUrl.startsWith("http://textures.minecraft.net/texture/")
-                                                    || headUrl.startsWith("https://textures.minecraft.net/texture/")) {
-                                                return false;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+        if (!tag.containsKey("SkullOwner")) return false;
+        NbtCompound skullOwner = tag.getCompound("SkullOwner");
+        if (!skullOwner.containsKey("Properties")) return false;
+        NbtCompound properties = skullOwner.getCompound("Properties");
+        if (!properties.containsKey("textures")) return true;
+        NbtList<NbtBase> textures = properties.getList("textures");
+        for (NbtBase texture : textures.asCollection()) {
+            if (!(texture instanceof NbtCompound)) continue;
+            if (!((NbtCompound) texture).containsKey("Value")) continue;
+            if (((NbtCompound) texture).getString("Value").trim().length() > 0) {
+                String decoded = null;
+                try {
+                    decoded = new String(Base64.getDecoder().decode(((NbtCompound) texture).getString("Value")));
+                } catch (Exception e) {
+                    decoded = new String(Base64.getMimeDecoder().decode(((NbtCompound) texture).getString("Value")));
+                }
+                if (decoded.isEmpty()) return true;
+                if (decoded.contains("textures")) {
+                    JsonObject jdecoded = gson.fromJson(decoded, JsonObject.class);
+                    if (!jdecoded.has("textures")) return false;
+                    JsonObject jtextures = jdecoded.getAsJsonObject("textures");
+                    if (!jtextures.has("SKIN")) return false;
+                    JsonObject jskin = jtextures.getAsJsonObject("SKIN");
+                    if (!jskin.has("url")) return false;
+                    String url = jskin.getAsJsonPrimitive("url").getAsString();
+
+                    if (url.isEmpty() || url.trim().length() == 0) return true;
+                    if (url.startsWith("http://textures.minecraft.net/texture/") || url.startsWith("https://textures.minecraft.net/texture/")) {
+                        return false;
                     }
                 }
-                tag.remove("SkullOwner");
-                return true;
             }
+
         }
-        return false;
+        return true;
     }
 
     private boolean checkEnchants(ItemStack stack, Player p, NbtCompound tag) {
+        if (!checkench) return false;
+        if (p.hasPermission("itemfixer.bypass.enchant")) return false;
+        if (!tag.containsKey("ench")) return false;
+        NbtList<NbtBase> enchants = tag.getList("ench");
+        if (enchants.size() <= 0) return false;
         boolean cheat = false;
-        if (checkench && !p.hasPermission("itemfixer.bypass.enchant") && tag.containsKey("ench")) {
-            NbtList<NbtBase> enchants = tag.getList("ench");
-            if (enchants.size() <= 0) {
-                return false;
-            }
 
-            List<NbtBase> enchCopy = new ArrayList<>(enchants.asCollection());
-            for (NbtBase nbtBase : enchCopy) {
-                if (!(nbtBase instanceof NbtCompound)) {
-                    tag.remove("ench");
-                    return true;
-                }
-                NbtCompound ench = (NbtCompound) nbtBase;
-                try {
-                    int lvl = ((Number)ench.getValue("lvl").getValue()).intValue();
-                    Enchantment enchantment = Enchantment.getById(((Number)ench.getValue("id").getValue()).intValue());
-                    String perm = "itemfixer.allow." + stack.getType().toString() + "." + enchantment.getName() + "." + lvl;
-                    if (removeInvalidEnch && !enchantment.canEnchantItem(stack) && !p.hasPermission(perm)) {
-                        enchants.remove(nbtBase);
-                        cheat = true;
-                    }
-                    if ((lvl > enchantment.getMaxLevel() || lvl < 0) && !p.hasPermission(perm)) {
-                        enchants.remove(nbtBase);
-                        cheat = true;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+        List<NbtBase> enchCopy = new ArrayList<>(enchants.asCollection());
+        for (NbtBase nbtBase : enchCopy) {
+            if (!(nbtBase instanceof NbtCompound)) {
+                tag.remove("ench");
+                return true;
+            }
+            NbtCompound ench = (NbtCompound) nbtBase;
+            try {
+                int lvl = ((Number) ench.getValue("lvl").getValue()).intValue();
+                Enchantment enchantment = Enchantment.getById(((Number) ench.getValue("id").getValue()).intValue());
+                String perm = "itemfixer.allow." + stack.getType().toString() + "." + enchantment.getName() + "." + lvl;
+                if (p.hasPermission(perm)) continue;
+                if ((removeInvalidEnch && !enchantment.canEnchantItem(stack)) || (lvl > enchantment.getMaxLevel() || lvl < 0)) {
                     enchants.remove(nbtBase);
                     cheat = true;
-                    continue;
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                enchants.remove(nbtBase);
+                cheat = true;
             }
         }
         return cheat;
     }
 
-    private boolean checkNbt(ItemStack stack, Player p, NbtCompound tag) {
-        boolean cheat = false;
+    private CheckStatus checkNbt(ItemStack stack, Player p, NbtCompound tag) {
+        CheckStatus cheat = CheckStatus.GOOD;
         try {
             Material mat = stack.getType();
             if (this.isCrashItem(stack, tag, mat)) {
                 tag.getKeys().clear();
                 stack.setAmount(1);
-                return true;
+                return CheckStatus.FIXED;
             }
             final String tagS = tag.toString();
             for (String nbt1 : nbt) {
                 if (tag.containsKey(nbt1)) {
                     tag.remove(nbt1);
-                    cheat = true;
+                    cheat = CheckStatus.FIXED;
                 }
             }
             if (tag.containsKey("BlockEntityTag") && !isShulkerBox(stack, stack) && !needIgnore(stack)
                     && !ignoreNbt.contains("BlockEntityTag")) {
                 tag.remove("BlockEntityTag");
-                cheat = true;
+                cheat = CheckStatus.FIXED;
             } else if (mat == Material.WRITTEN_BOOK && ((!ignoreNbt.contains("ClickEvent") && tagS.contains("ClickEvent"))
                     || (!ignoreNbt.contains("run_command") && tagS.contains("run_command")))) {
                 tag.getKeys().clear();
-                cheat = true;
+                cheat = CheckStatus.FIXED;
             } else if (mat == Material.MONSTER_EGG && !ignoreNbt.contains("EntityTag") && tag.containsKey("EntityTag") && fixEgg(tag)) {
-                cheat = true;
+                cheat = CheckStatus.FIXED;
             } else if (mat == Material.ARMOR_STAND && !ignoreNbt.contains("EntityTag") && tag.containsKey("EntityTag")) {
                 tag.remove("EntityTag");
-                cheat = true;
+                cheat = CheckStatus.FIXED;
             } else if ((mat == Material.SKULL || mat == Material.SKULL_ITEM) && stack.getDurability() == 3) {
                 if (isCrashSkull(tag)) {
-                    cheat = true;
+                    cheat = CheckStatus.FIXED;
                 }
             } else if (mat == Material.FIREWORK && checkFireWork(stack, tag)) {
-                cheat = true;
+                cheat = CheckStatus.FIXED;
             } else if (mat == Material.BANNER && checkBanner(stack)) {
-                cheat = true;
+                cheat = CheckStatus.FIXED;
             } else if (isPotion(stack) && !ignoreNbt.contains("CustomPotionEffects") && tag.containsKey("CustomPotionEffects")
                     && (checkPotion(stack, p) || checkCustomColor(tag.getCompound("CustomPotionEffects")))) {
-                cheat = true;
+                cheat = CheckStatus.FIXED;
             }
         } catch (Exception e) {
+            cheat = CheckStatus.FAILED;
+            e.printStackTrace();
         }
         return cheat;
     }
@@ -210,7 +179,7 @@ public class ItemChecker {
         BlockStateMeta meta = (BlockStateMeta) stack.getItemMeta();
         ShulkerBox box = (ShulkerBox) meta.getBlockState();
         for (ItemStack is : box.getInventory().getContents()) {
-            if (isShulkerBox(is, stack) || isHackedItem(is, p)) {
+            if (isShulkerBox(is, stack) || isHackedItem(is, p) != CheckStatus.GOOD) {
                 box.getInventory().clear();
                 meta.setBlockState(box);
                 stack.setItemMeta(meta);
@@ -220,14 +189,9 @@ public class ItemChecker {
     }
 
     private boolean isPotion(ItemStack stack) {
-        try {
-            //todo: support for < 1.12
-            return stack.getType() == Material.POTION || stack.getType() == Material.SPLASH_POTION || stack.getType() == Material.LINGERING_POTION;
-            //return stack.hasItemMeta() && stack.getItemMeta() instanceof PotionMeta;
-        } catch (IllegalArgumentException e) {
-            clearData(stack);
-            return false;
-        }
+        if (stack.getType() == Material.POTION) return true;
+        Material m = stack.getType();
+        return (VersionUtils.isVersion(9) && (m == Material.SPLASH_POTION || m == Material.LINGERING_POTION || m == Material.TIPPED_ARROW));
     }
 
     private boolean checkCustomColor(NbtCompound tag) {
@@ -265,10 +229,11 @@ public class ItemChecker {
     private boolean isShulkerBox(ItemStack stack, ItemStack rootStack) {
         if (stack == null || stack.getType() == Material.AIR)
             return false;
-        if (!plugin.isSupportedVersion())
+        if (!VersionUtils.isVersion(11)) {
             return false;
+        }
         //todo: material set
-        if ( stack.getType().name().endsWith("SHULKER_BOX")) {
+        if (stack.getType().name().endsWith("SHULKER_BOX")) {
             try {
                 ItemMeta itemMeta = stack.getItemMeta();
             } catch (IllegalArgumentException e) {
@@ -281,30 +246,40 @@ public class ItemChecker {
         return false;
     }
 
-    public boolean isHackedItem(ItemStack stack, Player p) {
+    public CheckStatus isHackedItem(ItemStack stack, Player p) {
         if (stack == null || stack.getType() == Material.AIR)
-            return false;
+            return CheckStatus.GOOD;
         if (this.world.contains(p.getWorld().getName().toLowerCase()) || plugin.isMagicItem(stack))
-            return false;
+            return CheckStatus.GOOD;
 
         this.checkShulkerBox(stack, p);
         boolean ignoreNbt = p.hasPermission("itemfixer.bypass.nbt");
         boolean ignoreEnchants = p.hasPermission("itemfixer.bypass.enchant");
         if (ignoreNbt && ignoreEnchants) {
-            return false;
+            return CheckStatus.GOOD;
         }
-        NbtCompound tag = (NbtCompound) MiniNbtFactory.fromItemTag(stack);
+        NbtCompound tag = null;
+        try {
+            tag = (NbtCompound) MiniNbtFactory.fromItemTag(stack);
+        } catch (Exception e) {
+            return CheckStatus.FAILED;
+        }
         if (tag == null) {
-            return false;
+            return CheckStatus.GOOD;
         }
-        if (!ignoreNbt && this.checkNbt(stack, p, tag)) {
-            if (!ignoreEnchants) {
-                checkEnchants(stack, p, tag);
+        CheckStatus checkStatus = CheckStatus.GOOD;
+        if (!ignoreNbt) {
+            checkStatus = checkNbt(stack, p, tag);
+            if (checkStatus == CheckStatus.FAILED) {
+                return checkStatus;
             }
-            return true;
         }
-        return !ignoreEnchants && checkEnchants(stack, p, tag);
+        if (!ignoreEnchants && checkEnchants(stack, p, tag)) {
+            return CheckStatus.FIXED;
+        }
+        return checkStatus;
     }
+
 
     private boolean checkBanner(ItemStack stack) {
         ItemMeta meta = stack.getItemMeta();
@@ -394,5 +369,11 @@ public class ItemChecker {
         if (tag == null)
             return;
         tag.getKeys().clear();
+    }
+
+    public enum CheckStatus {
+        FIXED,
+        FAILED,
+        GOOD
     }
 }

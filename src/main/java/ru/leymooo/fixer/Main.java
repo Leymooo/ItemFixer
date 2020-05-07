@@ -21,7 +21,6 @@ import ru.leymooo.fixer.utils.VersionUtils;
 
 public class Main extends JavaPlugin {
 
-    private boolean useArtMap;
     private MagicAPI mapi;
     private ItemChecker checker;
     private ProtocolManager manager;
@@ -29,11 +28,16 @@ public class Main extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        if (!isSupportedVersion()) {
+            getLogger().warning("ItemFixer does not suppoer your server version");
+            setEnabled(false);
+            return;
+        }
+
         saveDefaultConfig();
         checkNewConfig();
         PluginManager pmanager = Bukkit.getPluginManager();
         mapi = getMagicAPI();
-        useArtMap = initArtMapApi();
         checker = new ItemChecker(this);
         manager = ProtocolLibrary.getProtocolManager();
         manager.addPacketListener(new NBTListener(this));
@@ -54,7 +58,7 @@ public class Main extends JavaPlugin {
         manager = null;
     }
 
-    public boolean checkItem(ItemStack stack, Player p) {
+    public ItemChecker.CheckStatus checkItem(ItemStack stack, Player p) {
         return checker.isHackedItem(stack, p);
     }
 
@@ -85,11 +89,6 @@ public class Main extends JavaPlugin {
 
     public boolean isSupportedVersion() {
         return !VersionUtils.isVersion(13);// now ItemFixer does not support 1.13+
-    }
-
-    private boolean initArtMapApi() {
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("ArtMap");
-        return plugin != null && plugin.isEnabled();
     }
 
     private void checkUpdate() {
