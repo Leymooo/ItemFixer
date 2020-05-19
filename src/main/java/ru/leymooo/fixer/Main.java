@@ -29,7 +29,7 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         if (!isSupportedVersion()) {
-            getLogger().warning("ItemFixer does not suppoer your server version");
+            getLogger().warning("ItemFixer does not support your server version");
             setEnabled(false);
             return;
         }

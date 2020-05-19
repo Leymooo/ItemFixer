@@ -3,6 +3,7 @@ package ru.leymooo.fixer;
 import com.comphenix.protocol.wrappers.nbt.NbtBase;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtList;
+import com.comphenix.protocol.wrappers.nbt.NbtType;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.bukkit.Color;
@@ -337,6 +338,9 @@ public class ItemChecker {
             return true;
         }
         int tagL = tag.toString().length();
+        if (hasLongArrayTag(tag)) {
+            return true;
+        }
         if ((mat == Material.NAME_TAG || tiles.contains(mat)) && tagL > 600) {
             return true;
         }
@@ -352,10 +356,10 @@ public class ItemChecker {
             Object id = enttag.getObject("id");
             Object color = enttag.getObject("Color");
             enttag.getKeys().clear();
-            if (id != null && id instanceof String) {
+            if (id instanceof String) {
                 enttag.put("id", (String) id);
             }
-            if (color != null && color instanceof Byte) {
+            if (color instanceof Byte) {
                 enttag.put("Color", (byte) color);
             }
             tag.put("EntityTag", enttag);
@@ -369,6 +373,34 @@ public class ItemChecker {
         if (tag == null)
             return;
         tag.getKeys().clear();
+    }
+
+    private boolean hasLongArrayTag(NbtCompound tag) {
+        for (NbtBase nbt : tag) {
+            if (nbt.getType() == NbtType.TAG_LONG_ARRAY) {
+                return true;
+            }
+            if (nbt.getType() == NbtType.TAG_COMPOUND && hasLongArrayTag((NbtCompound) nbt)) {
+                return true;
+            }
+            if (nbt.getType() == NbtType.TAG_LIST && hasLongArrayTagInList((NbtList) nbt)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasLongArrayTagInList(NbtList list) {
+        if (list.size() == 0) return false;
+        for (Object o : list.asCollection()) {
+            if (o instanceof NbtCompound && hasLongArrayTag((NbtCompound) o)) {
+                return true;
+            }
+            if (o instanceof NbtList && hasLongArrayTagInList((NbtList) o)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public enum CheckStatus {
