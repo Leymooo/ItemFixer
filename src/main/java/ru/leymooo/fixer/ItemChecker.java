@@ -338,7 +338,7 @@ public class ItemChecker {
             return true;
         }
         int tagL = tag.toString().length();
-        if (hasLongArrayTag(tag)) {
+        if (plugin.isLongArraysSupported() && hasLongArrayTag(tag)) {
             return true;
         }
         if ((mat == Material.NAME_TAG || tiles.contains(mat)) && tagL > 600) {

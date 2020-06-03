@@ -2,6 +2,7 @@ package ru.leymooo.fixer;
 
 import java.io.File;
 
+import com.comphenix.protocol.wrappers.nbt.NbtType;
 import me.catcoder.updatechecker.PluginUpdater;
 import me.catcoder.updatechecker.UpdaterException;
 import me.catcoder.updatechecker.UpdaterResult;
@@ -24,6 +25,7 @@ public class Main extends JavaPlugin {
     private MagicAPI mapi;
     private ItemChecker checker;
     private ProtocolManager manager;
+    private boolean longArraysSupported;
     private final PluginUpdater updater = new PluginUpdater(this, "Dimatert9", "ItemFixer");
 
     @Override
@@ -33,7 +35,7 @@ public class Main extends JavaPlugin {
             setEnabled(false);
             return;
         }
-
+        checkLongArraySupport();
         saveDefaultConfig();
         checkNewConfig();
         PluginManager pmanager = Bukkit.getPluginManager();
@@ -104,5 +106,16 @@ public class Main extends JavaPlugin {
                 e.print();
             }
         }).start();
+    }
+
+    private void checkLongArraySupport() {
+        try {
+            NbtType type = NbtType.TAG_LONG_ARRAY;
+            this.longArraysSupported = NbtType.valueOf("TAG_LONG_ARRAY") != null || type != null;
+        } catch (Throwable e) {}
+    }
+
+    public boolean isLongArraysSupported() {
+        return longArraysSupported;
     }
 }
