@@ -3,9 +3,6 @@ package ru.leymooo.fixer;
 import java.io.File;
 
 import com.comphenix.protocol.wrappers.nbt.NbtType;
-import me.catcoder.updatechecker.PluginUpdater;
-import me.catcoder.updatechecker.UpdaterException;
-import me.catcoder.updatechecker.UpdaterResult;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -26,7 +23,6 @@ public class Main extends JavaPlugin {
     private ItemChecker checker;
     private ProtocolManager manager;
     private boolean longArraysSupported;
-    private final PluginUpdater updater = new PluginUpdater(this, "Dimatert9", "ItemFixer");
 
     @Override
     public void onEnable() {
@@ -45,7 +41,6 @@ public class Main extends JavaPlugin {
         manager.addPacketListener(new NBTListener(this));
         pmanager.registerEvents(new NBTBukkitListener(this), this);
         pmanager.registerEvents(new TextureFix(this), this);
-        if (getConfig().getBoolean("check-update")) checkUpdate();
         Bukkit.getConsoleSender().sendMessage("§b[ItemFixer] §aenabled");
     }
 
@@ -91,21 +86,6 @@ public class Main extends JavaPlugin {
 
     public boolean isSupportedVersion() {
         return !VersionUtils.isVersion(13);// now ItemFixer does not support 1.13+
-    }
-
-    private void checkUpdate() {
-        new Thread(()-> {
-            try {
-                UpdaterResult result = updater.checkUpdates();
-                if (result.hasUpdates()) {
-                    Bukkit.getConsoleSender().sendMessage("§b[ItemFixer] §cНовое обновление найдено! | The new version found!");
-                } else {
-                    Bukkit.getConsoleSender().sendMessage("§b[ItemFixer] §aОбновлений не найдено. | No updates found.");
-                }
-            } catch (UpdaterException e) {
-                e.print();
-            }
-        }).start();
     }
 
     private void checkLongArraySupport() {

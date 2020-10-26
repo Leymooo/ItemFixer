@@ -139,8 +139,14 @@ public class ItemChecker {
             }
             if (tag.containsKey("BlockEntityTag") && !isShulkerBox(stack, stack) && !needIgnore(stack)
                     && !ignoreNbt.contains("BlockEntityTag")) {
-                tag.remove("BlockEntityTag");
-                cheat = CheckStatus.FIXED;
+                if (mat == Material.MOB_SPAWNER) {
+                    if (fixSpawner(tag)) {
+                        cheat = CheckStatus.FIXED;
+                    }
+                } else {
+                    tag.remove("BlockEntityTag");
+                    cheat = CheckStatus.FIXED;
+                }
             } else if (mat == Material.WRITTEN_BOOK && ((!ignoreNbt.contains("ClickEvent") && tagS.contains("ClickEvent"))
                     || (!ignoreNbt.contains("run_command") && tagS.contains("run_command")))) {
                 tag.getKeys().clear();
@@ -349,22 +355,92 @@ public class ItemChecker {
         return mat == Material.WRITTEN_BOOK ? (tagL >= 16500) : (tagL >= 13000);
     }
 
-    private boolean fixEgg(NbtCompound tag) {
-        NbtCompound enttag = tag.getCompound("EntityTag");
-        int size = enttag.getKeys().size();
-        if (size >= 2) {
-            Object id = enttag.getObject("id");
-            Object color = enttag.getObject("Color");
-            enttag.getKeys().clear();
-            if (id instanceof String) {
-                enttag.put("id", (String) id);
-            }
-            if (color instanceof Byte) {
-                enttag.put("Color", (byte) color);
-            }
-            tag.put("EntityTag", enttag);
-            return color == null ? true : size >= 3;
+    private boolean fixSpawner(NbtCompound tag) {
+        if (!tag.containsKey("SpawnData")) return false;
+        if (tag.containsKey("Delay")) {
+            tag.remove("Delay");
+            return true;
         }
+        NbtCompound compound = tag.getCompound("SpawnData");
+        if (!compound.containsKey("id") || compound.getKeys().size() != 1) {
+            tag.remove("SpawnData");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean fixEgg(NbtCompound tag) {
+        if (!tag.containsKey("EntityTag")) return false;
+        NbtCompound entTag = tag.getCompound("EntityTag");
+
+        if (!entTag.containsKey("id")) {
+            tag.remove("EntityTag");
+            return true;
+        }
+
+        Object id = entTag.getObject("id");
+        if (!(id instanceof String)) {
+            tag.remove("EntityTag");
+            return true;
+        }
+        entTag.put("id", (String) id); //Я особо не помню для чего это, но раз это сделано зачемто значит нужно
+        Object color = entTag.getObject("Color");
+        if (color instanceof Byte) {
+            entTag.put("Color", (byte) color);
+        }
+
+        String sId = (String) id;
+        int size = entTag.getKeys().size();
+
+        if ((color == null && size != 1) || (color != null && size != 2)) { // recheck why it was 2 and 3
+            tag.remove("EntityTag");
+            return true;
+        }
+
+        switch (sId.toLowerCase()) {
+            case "item":
+            case "xp_orb":
+            case "area_effect_cloud":
+            case "egg":
+            case "leash_knot":
+            case "painting":
+            case "arrow":
+            case "snowball":
+            case "fireball":
+            case "small_fireball":
+            case "ender_pearl":
+            case "eye_of_ender_signal":
+            case "potion":
+            case "xp_bottle":
+            case "item_frame":
+            case "wither_skull":
+            case "tnt":
+            case "falling_block":
+            case "fireworks_rocket":
+            case "spectral_arrow":
+            case "shulker_bullet":
+            case "dragon_fireball":
+            case "armor_stand":
+            case "evocation_fangs":
+            case "commandblock_minecart":
+            case "boat":
+            case "minecart":
+            case "chest_minecart":
+            case "furnace_minecart":
+            case "tnt_minecart":
+            case "hopper_minecart":
+            case "spawner_minecart":
+            case "giant":
+            case "ender_dragon":
+            case "wither":
+            case "snowman":
+            case "villager_golem":
+            case "llama_spit":
+            case "ender_crystal":
+                tag.remove("EntityTag");
+                return true;
+        }
+
         return false;
     }
 
